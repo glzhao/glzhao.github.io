@@ -7,5 +7,4 @@ sharing: true
 footer: true
 ---
 
-联系我: lucienchao(at)gmail.com
-
+contact me: lucienchao(at)gmail.com

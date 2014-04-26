@@ -91,14 +91,32 @@ function flashVideoFallback(){
   });
 }
 
+//function wrapFlashVideos() {
+//  $('object').each(function(i, object) {
+//    if( $(object).find('param[name=movie]').length ){
+//      $(object).wrap('<div class="flash-video">')
+//    }
+//  });
+//  $('iframe[src*=vimeo],iframe[src*=youtube]').wrap('<div class="flash-video">')
+//}
+
 function wrapFlashVideos() {
-  $('object').each(function(i, object) {
-    if( $(object).find('param[name=movie]').length ){
-      $(object).wrap('<div class="flash-video">')
-    }
-  });
-  $('iframe[src*=vimeo],iframe[src*=youtube]').wrap('<div class="flash-video">')
+  $('object').each(function(object) {
+	      object = $(object);
+      if (object.attr('id') != "JIATHISSWF") {
+            if ( $('param[name=movie]', object).length ) {
+	      var wrapper = object.before('<div class="flash-video"><div>').previous();
+	      $(wrapper).children().append(object);
+	          }
+	        }
+        });
+    $('iframe[src*=vimeo],iframe[src*=youtube]').each(function(iframe) {
+        iframe = $(iframe);
+        var wrapper = iframe.before('<div class="flash-video"><div>').previous();
+        $(wrapper).children().append(iframe);
+      });
 }
+
 
 function renderDeliciousLinks(items) {
   var output = "<ul>";
