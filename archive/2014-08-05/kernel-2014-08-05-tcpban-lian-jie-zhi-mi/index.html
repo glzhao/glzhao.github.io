@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tcp半连接之谜 | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="问题公司线上遇到了一个问题，TCP建连失败。具体的情况是，client端不断的发送SYN包到server端，通过tcpdump抓包，发现server端也收到了SYN，但就是没有响应。
+分析tcp建连的过程不会涉及到用户态的应用层，所以tcpdump可以抓到SYN包，而没有抓到返回的SYN+ACK包说明问题出现在内核网络部分的处理上，必须深入内核代码查看。本文基于Redhat企业版，对应的内核版本为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tcp半连接之谜">
+<meta property="og:url" content="http://glzhao.github.io/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="问题公司线上遇到了一个问题，TCP建连失败。具体的情况是，client端不断的发送SYN包到server端，通过tcpdump抓包，发现server端也收到了SYN，但就是没有响应。
+分析tcp建连的过程不会涉及到用户态的应用层，所以tcpdump可以抓到SYN包，而没有抓到返回的SYN+ACK包说明问题出现在内核网络部分的处理上，必须深入内核代码查看。本文基于Redhat企业版，对应的内核版本为">
+<meta property="og:updated_time" content="2017-01-22T13:25:01.355Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tcp半连接之谜">
+<meta name="twitter:description" content="问题公司线上遇到了一个问题，TCP建连失败。具体的情况是，client端不断的发送SYN包到server端，通过tcpdump抓包，发现server端也收到了SYN，但就是没有响应。
+分析tcp建连的过程不会涉及到用户态的应用层，所以tcpdump可以抓到SYN包，而没有抓到返回的SYN+ACK包说明问题出现在内核网络部分的处理上，必须深入内核代码查看。本文基于Redhat企业版，对应的内核版本为">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-kernel-2014-08-05-tcpban-lian-jie-zhi-mi" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/" class="article-date">
+  <time datetime="2014-08-05T04:19:36.000Z" itemprop="datePublished">2014-08-05</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/kernel/">kernel</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      tcp半连接之谜
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>公司线上遇到了一个问题，TCP建连失败。具体的情况是，client端不断的发送SYN包到server端，通过tcpdump抓包，发现server端也收到了SYN，但就是没有响应。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>tcp建连的过程不会涉及到用户态的应用层，所以tcpdump可以抓到SYN包，而没有抓到返回的SYN+ACK包说明问题出现在内核网络部分的处理上，必须深入内核代码查看。本文基于Redhat企业版，对应的内核版本为2.6.18-308.24.1.el5。</p>
+<p>先来看下TCP协议对应IPV4的结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="number">1310</span> <span class="keyword">static</span> <span class="keyword">struct</span> net_protocol tcp_protocol = &#123;</div><div class="line">   <span class="number">1</span>         .handler =      tcp_v4_rcv,</div><div class="line">   <span class="number">2</span>         .err_handler =  tcp_v4_err,</div><div class="line">   <span class="number">3</span>         .gso_send_check = tcp_v4_gso_send_check,</div><div class="line">   <span class="number">4</span>         .gso_segment =  tcp_tso_segment,</div><div class="line">   <span class="number">5</span>         .no_policy =    <span class="number">1</span>,</div><div class="line">   <span class="number">6</span> &#125;;</div></pre></td></tr></table></figure>
+<p>tcp_v4_crv()为包处理接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">              ...</div><div class="line"></div><div class="line"><span class="number">1122</span>         <span class="keyword">if</span> (!sock_owned_by_user(sk)) &#123;</div><div class="line">   <span class="number">1</span> <span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_NET_DMA</span></div><div class="line">   <span class="number">2</span>                 <span class="keyword">struct</span> tcp_sock *tp = tcp_sk(sk);</div><div class="line">   <span class="number">3</span>                 <span class="keyword">if</span> (!tp-&gt;ucopy.dma_chan &amp;&amp; tp-&gt;ucopy.pinned_list)</div><div class="line">   <span class="number">4</span>                         tp-&gt;ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);</div><div class="line">   <span class="number">5</span>                 <span class="keyword">if</span> (tp-&gt;ucopy.dma_chan)</div><div class="line">   <span class="number">6</span>                         ret = tcp_v4_do_rcv(sk, skb);</div><div class="line">   <span class="number">7</span>                 <span class="keyword">else</span></div><div class="line">   <span class="number">8</span> #endif</div><div class="line">   <span class="number">9</span>                 &#123;</div><div class="line">  <span class="number">10</span>                         <span class="keyword">if</span> (!tcp_prequeue(sk, skb))</div><div class="line">  <span class="number">11</span>                         ret = tcp_v4_do_rcv(sk, skb);</div><div class="line">  <span class="number">12</span>                 &#125;</div><div class="line">  <span class="number">13</span>         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (sk_add_backlog(sk, skb)) &#123;</div><div class="line">  <span class="number">14</span>                 bh_unlock_sock(sk);</div><div class="line">  <span class="number">15</span>                 <span class="keyword">goto</span> discard_and_relse;</div><div class="line">  <span class="number">16</span>         &#125;</div><div class="line"></div><div class="line">              ...</div></pre></td></tr></table></figure>
+<p>该函数中的tcp_v4_do_rcv(sk, skb)就用来处理接收到的包，再看tcp_v4_do_rcv()对应的定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">          ...</div><div class="line"></div><div class="line"><span class="number">1035</span>         TCP_CHECK_TIMER(sk);</div><div class="line">   <span class="number">1</span>         <span class="keyword">if</span> (tcp_rcv_state_process(sk, skb, skb-&gt;h.th, skb-&gt;len))</div><div class="line">   <span class="number">2</span>                 <span class="keyword">goto</span> reset;</div><div class="line">   <span class="number">3</span>         TCP_CHECK_TIMER(sk);</div><div class="line">   <span class="number">4</span>         <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">          ...</div></pre></td></tr></table></figure>
+<p>tcp_rcv_state_process():</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">	...</div><div class="line"></div><div class="line"><span class="number">4390</span>         <span class="keyword">case</span> TCP_LISTEN:</div><div class="line">   <span class="number">1</span>                 <span class="keyword">if</span>(th-&gt;ack)</div><div class="line">   <span class="number">2</span>                         <span class="keyword">return</span>;</div><div class="line">   <span class="number">3</span></div><div class="line">   <span class="number">4</span>                 <span class="keyword">if</span>(th-&gt;rst)</div><div class="line">   <span class="number">5</span>                         <span class="keyword">goto</span> discard;</div><div class="line">   <span class="number">6</span></div><div class="line">   <span class="number">7</span>                 <span class="keyword">if</span>(th-&gt;syn) &#123;</div><div class="line">   <span class="number">8</span>                         <span class="keyword">if</span> (icsk-&gt;icsk_af_ops-&gt;conn_request(sk, skb) &lt; <span class="number">0</span>)</div><div class="line">   <span class="number">9</span>                                 <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">		</div><div class="line">	...</div></pre></td></tr></table></figure>
+<p>通过ipv4_specific结构可知icsk-&gt;icsk_af_ops-&gt;conn_request()对应的callback函数为<br>tcp_v4_conn_request()</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> inet_connection_sock_af_ops ipv4_specific = &#123;</div><div class="line">	.queue_xmit	   = ip_queue_xmit,</div><div class="line">	.send_check	   = tcp_v4_send_check,</div><div class="line">	.rebuild_header	   = inet_sk_rebuild_header,</div><div class="line">	.conn_request	   = tcp_v4_conn_request,</div><div class="line">	.syn_recv_sock	   = tcp_v4_syn_recv_sock,</div><div class="line">	.remember_stamp	   = tcp_v4_remember_stamp,</div><div class="line">	.net_header_len	   = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> iphdr),</div><div class="line">	.setsockopt	   = ip_setsockopt,</div><div class="line">	.getsockopt	   = ip_getsockopt,</div><div class="line">	.addr2sockaddr	   = inet_csk_addr2sockaddr,</div><div class="line">	.sockaddr_len	   = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in),</div></pre></td></tr></table></figure>
+<p>接下来到了我们这次问题的核心函数tcp_v4_conn_request(),看下定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">tcp_v4_conn_request</span><span class="params">(<span class="keyword">struct</span> sock *sk, <span class="keyword">struct</span> sk_buff *skb)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> inet_request_sock *ireq;</div><div class="line">	<span class="keyword">struct</span> tcp_options_received tmp_opt;</div><div class="line">	<span class="keyword">struct</span> request_sock *req;</div><div class="line">	__u32 saddr = skb-&gt;nh.iph-&gt;saddr;</div><div class="line">	__u32 daddr = skb-&gt;nh.iph-&gt;daddr;</div><div class="line">	__u32 isn = TCP_SKB_CB(skb)-&gt;when;</div><div class="line">	<span class="keyword">struct</span> dst_entry *dst = <span class="literal">NULL</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SYN_COOKIES</span></div><div class="line">	<span class="keyword">int</span> want_cookie = <span class="number">0</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> want_cookie 0 <span class="comment">/* Argh, why doesn't gcc optimize this :( */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">	<span class="comment">/* Never answer to SYNs send to broadcast or multicast */</span></div><div class="line">	<span class="keyword">if</span> (((<span class="keyword">struct</span> rtable *)skb-&gt;dst)-&gt;rt_flags &amp;</div><div class="line">	    (RTCF_BROADCAST | RTCF_MULTICAST))</div><div class="line">		<span class="keyword">goto</span> drop;</div><div class="line"></div><div class="line">	<span class="comment">/* TW buckets are converted to open requests without</span></div><div class="line">	 * limitations, they conserve resources and peer is</div><div class="line">	 * evidently real one.</div><div class="line">	 */</div><div class="line">	<span class="keyword">if</span> (inet_csk_reqsk_queue_is_full(sk) &amp;&amp; !isn) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SYN_COOKIES</span></div><div class="line">		<span class="keyword">if</span> (sysctl_tcp_syncookies) &#123;</div><div class="line">			want_cookie = <span class="number">1</span>;</div><div class="line">		&#125; <span class="keyword">else</span></div><div class="line">#endif</div><div class="line">		<span class="keyword">goto</span> drop;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">/* Accept backlog is full. If we have already queued enough</span></div><div class="line">	 * of warm entries in syn queue, drop request. It is better than</div><div class="line">	 * clogging syn queue with openreqs with exponentially increasing</div><div class="line">	 * timeout.</div><div class="line">	 */</div><div class="line">	<span class="keyword">if</span> (sk_acceptq_is_full(sk) &amp;&amp; inet_csk_reqsk_queue_young(sk) &gt; <span class="number">1</span>)</div><div class="line">		<span class="keyword">goto</span> drop;</div><div class="line"></div><div class="line">	req = reqsk_alloc(&amp;tcp_request_sock_ops);</div><div class="line">	<span class="keyword">if</span> (!req)</div><div class="line">		<span class="keyword">goto</span> drop;</div><div class="line"></div><div class="line">	tcp_clear_options(&amp;tmp_opt);</div><div class="line">	tmp_opt.mss_clamp = <span class="number">536</span>;</div><div class="line">	tmp_opt.user_mss  = tcp_sk(sk)-&gt;rx_opt.user_mss;</div><div class="line"></div><div class="line">	tcp_parse_options(skb, &amp;tmp_opt, <span class="number">0</span>);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (want_cookie &amp;&amp; !tmp_opt.saw_tstamp)</div><div class="line">		tcp_clear_options(&amp;tmp_opt);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (tmp_opt.saw_tstamp &amp;&amp; !tmp_opt.rcv_tsval) &#123;</div><div class="line">		<span class="comment">/* Some OSes (unknown ones, but I see them on web server, which</span></div><div class="line">		 * contains information interesting only for windows'</div><div class="line">		 * users) do not send their stamp in SYN. It is easy case.</div><div class="line">		 * We simply do not advertise TS support.</div><div class="line">		 */</div><div class="line">		tmp_opt.saw_tstamp = <span class="number">0</span>;</div><div class="line">		tmp_opt.tstamp_ok  = <span class="number">0</span>;</div><div class="line">	&#125;</div><div class="line">	tmp_opt.tstamp_ok = tmp_opt.saw_tstamp;</div><div class="line"></div><div class="line">	tcp_openreq_init(req, &amp;tmp_opt, skb);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (security_inet_conn_request(sk, skb, req))</div><div class="line">		<span class="keyword">goto</span> drop_and_free;</div><div class="line"></div><div class="line">	ireq = inet_rsk(req);</div><div class="line">	ireq-&gt;loc_addr = daddr;</div><div class="line">	ireq-&gt;rmt_addr = saddr;</div><div class="line">	ireq-&gt;opt = tcp_v4_save_options(sk, skb);</div><div class="line">	<span class="keyword">if</span> (!want_cookie)</div><div class="line">		TCP_ECN_create_request(req, skb-&gt;h.th);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (want_cookie) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SYN_COOKIES</span></div><div class="line">		syn_flood_warning(skb);</div><div class="line">		req-&gt;cookie_ts = tmp_opt.tstamp_ok;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">		isn = cookie_v4_init_sequence(sk, skb, &amp;req-&gt;mss);</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (!isn) &#123;</div><div class="line">		<span class="keyword">struct</span> inet_peer *peer = <span class="literal">NULL</span>;</div><div class="line"></div><div class="line">		<span class="comment">/* VJ's idea. We save last timestamp seen</span></div><div class="line">		 * from the destination in peer table, when entering</div><div class="line">		 * state TIME-WAIT, and check against it before</div><div class="line">		 * accepting new connection request.</div><div class="line">		 *</div><div class="line">		 * If "isn" is not zero, this request hit alive</div><div class="line">		 * timewait bucket, so that all the necessary checks</div><div class="line">		 * are made in the function processing timewait state.</div><div class="line">		 */</div><div class="line">		<span class="keyword">if</span> (tmp_opt.saw_tstamp &amp;&amp;</div><div class="line">		    tcp_death_row.sysctl_tw_recycle &amp;&amp;</div><div class="line">		    (dst = inet_csk_route_req(sk, req)) != <span class="literal">NULL</span> &amp;&amp;</div><div class="line">		    (peer = rt_get_peer((<span class="keyword">struct</span> rtable *)dst)) != <span class="literal">NULL</span> &amp;&amp;</div><div class="line">		    peer-&gt;v4daddr == saddr) &#123;</div><div class="line">			<span class="keyword">if</span> (xtime.tv_sec &lt; peer-&gt;tcp_ts_stamp + TCP_PAWS_MSL &amp;&amp;</div><div class="line">			    (s32)(peer-&gt;tcp_ts - req-&gt;ts_recent) &gt;</div><div class="line">							TCP_PAWS_WINDOW) &#123;</div><div class="line">				NET_INC_STATS_BH(LINUX_MIB_PAWSPASSIVEREJECTED);</div><div class="line">				dst_release(dst);</div><div class="line">				<span class="keyword">goto</span> drop_and_free;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="comment">/* Kill the following clause, if you dislike this way. */</span></div><div class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (!sysctl_tcp_syncookies &amp;&amp;</div><div class="line">			 (sysctl_max_syn_backlog - inet_csk_reqsk_queue_len(sk) &lt;</div><div class="line">			  (sysctl_max_syn_backlog &gt;&gt; <span class="number">2</span>)) &amp;&amp;</div><div class="line">			 (!peer || !peer-&gt;tcp_ts_stamp) &amp;&amp;</div><div class="line">			 (!dst || !dst_metric(dst, RTAX_RTT))) &#123;</div><div class="line">			<span class="comment">/* Without syncookies last quarter of</span></div><div class="line">			 * backlog is filled with destinations,</div><div class="line">			 * proven to be alive.</div><div class="line">			 * It means that we continue to communicate</div><div class="line">			 * to destinations, already remembered</div><div class="line">			 * to the moment of synflood.</div><div class="line">			 */</div><div class="line">			LIMIT_NETDEBUG(KERN_DEBUG <span class="string">"TCP: drop open "</span></div><div class="line">				       <span class="string">"request from %u.%u.%u.%u/%u\n"</span>,</div><div class="line">				       NIPQUAD(saddr),</div><div class="line">				       ntohs(skb-&gt;h.th-&gt;source));</div><div class="line">			dst_release(dst);</div><div class="line">			<span class="keyword">goto</span> drop_and_free;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		isn = tcp_v4_init_sequence(sk, skb);</div><div class="line">	&#125;</div><div class="line">	tcp_rsk(req)-&gt;snt_isn = isn;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (tcp_v4_send_synack(sk, req, dst))</div><div class="line">		<span class="keyword">goto</span> drop_and_free;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (want_cookie) &#123;</div><div class="line">	   	reqsk_free(req);</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		inet_csk_reqsk_queue_hash_add(sk, req, sysctl_tcp_active_timeout);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line"></div><div class="line">drop_and_free:</div><div class="line">	reqsk_free(req);</div><div class="line">drop:</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这上面有很多的drop分支，所以可能有多个丢弃包的可能，由于server的内存充足,所以在排除了其他的几种可能性之后(比如timestamps等),<br>怀疑问题出在以下两个地方：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">	<span class="keyword">if</span> (inet_csk_reqsk_queue_is_full(sk) &amp;&amp; !isn) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SYN_COOKIES</span></div><div class="line">		<span class="keyword">if</span> (sysctl_tcp_syncookies) &#123;</div><div class="line">			want_cookie = <span class="number">1</span>;</div><div class="line">		&#125; <span class="keyword">else</span></div><div class="line">#endif</div><div class="line">		<span class="keyword">goto</span> drop;</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<p>和</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">if</span> (sk_acceptq_is_full(sk) &amp;&amp; inet_csk_reqsk_queue_young(sk) &gt; <span class="number">1</span>)</div><div class="line">	<span class="keyword">goto</span> drop;</div></pre></td></tr></table></figure>
+<p>由于公司的服务器上开启了synookies ;-(，所以问题极有可能是sk_acceptq_is_full()为真。<br>我们看下sk_acceptq_is_full()的定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">sk_acceptq_is_full</span><span class="params">(<span class="keyword">struct</span> sock *sk)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> sk-&gt;sk_ack_backlog &gt; sk-&gt;sk_max_ack_backlog;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>sk_max_ack_backlog的最大值是如何设置的呢？</p>
+<p>sys_listen的实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SOMAXCONN	128</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> sysctl_somaxconn = SOMAXCONN;</div><div class="line"></div><div class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_listen</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">int</span> backlog)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> socket *sock;</div><div class="line">	<span class="keyword">int</span> err, fput_needed;</div><div class="line">	</div><div class="line">	<span class="keyword">if</span> ((sock = sockfd_lookup_light(fd, &amp;err, &amp;fput_needed)) != <span class="literal">NULL</span>) &#123;</div><div class="line">		<span class="keyword">if</span> ((<span class="keyword">unsigned</span>) backlog &gt; sysctl_somaxconn)</div><div class="line">			backlog = sysctl_somaxconn;</div><div class="line"></div><div class="line">		err = security_socket_listen(sock, backlog);</div><div class="line">		<span class="keyword">if</span> (!err)</div><div class="line">			err = sock-&gt;ops-&gt;listen(sock, backlog);</div><div class="line"></div><div class="line">		fput_light(sock-&gt;file, fput_needed);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> err;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>inet_listen()的实现:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">inet_listen</span><span class="params">(<span class="keyword">struct</span> socket *sock, <span class="keyword">int</span> backlog)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> sock *sk = sock-&gt;sk;</div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> old_state;</div><div class="line">	<span class="keyword">int</span> err;</div><div class="line"></div><div class="line">	lock_sock(sk);</div><div class="line"></div><div class="line">	err = -EINVAL;</div><div class="line">	<span class="keyword">if</span> (sock-&gt;state != SS_UNCONNECTED || sock-&gt;type != SOCK_STREAM)</div><div class="line">		<span class="keyword">goto</span> out;</div><div class="line"></div><div class="line">	old_state = sk-&gt;sk_state;</div><div class="line">	<span class="keyword">if</span> (!((<span class="number">1</span> &lt;&lt; old_state) &amp; (TCPF_CLOSE | TCPF_LISTEN)))</div><div class="line">		<span class="keyword">goto</span> out;</div><div class="line"></div><div class="line">	<span class="comment">/* Really, if the socket is already in listen state</span></div><div class="line">	 * we can only allow the backlog to be adjusted.</div><div class="line">	 */</div><div class="line">	<span class="keyword">if</span> (old_state != TCP_LISTEN) &#123;</div><div class="line">		err = inet_csk_listen_start(sk, TCP_SYNQ_HSIZE);</div><div class="line">		<span class="keyword">if</span> (err)</div><div class="line">			<span class="keyword">goto</span> out;</div><div class="line">	&#125;</div><div class="line">	sk-&gt;sk_max_ack_backlog = backlog;</div><div class="line">	err = <span class="number">0</span>;</div><div class="line"></div><div class="line">out:</div><div class="line">	release_sock(sk);</div><div class="line">	<span class="keyword">return</span> err;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从这两个函数可以看出sk_max_ack_backlog的值取两个值的最小值：</p>
+<ul>
+<li>用户listen()调用的第二个参数backlog</li>
+<li>系统sk_max_ack_backlog值(对应的proc位置为/proc/sys/net/core/somaxconn, 默认值为128)</li>
+</ul>
+<p>syncookies主要是用来应对syc flood攻击的，所以一般情况下不建议开启，这样的话半连接的数量<br>还受到另外一个条件的影响，inet_csk_reqsk_queue_is_full(sk):</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">inet_csk_reqsk_queue_is_full</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> sock *sk)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> reqsk_queue_is_full(&amp;inet_csk(sk)-&gt;icsk_accept_queue);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">reqsk_queue_is_full</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> request_sock_queue *<span class="built_in">queue</span>)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> <span class="built_in">queue</span>-&gt;listen_opt-&gt;qlen &gt;&gt; <span class="built_in">queue</span>-&gt;listen_opt-&gt;max_qlen_log;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们来看下max_qlen_log是如何赋值的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">reqsk_queue_alloc</span><span class="params">(<span class="keyword">struct</span> request_sock_queue *<span class="built_in">queue</span>,</span></span></div><div class="line">		      <span class="keyword">const</span> <span class="keyword">int</span> nr_table_entries)</div><div class="line">&#123;</div><div class="line">	<span class="keyword">const</span> <span class="keyword">int</span> lopt_size = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> listen_sock) +</div><div class="line">			      nr_table_entries * <span class="keyword">sizeof</span>(<span class="keyword">struct</span> request_sock *);</div><div class="line">	<span class="keyword">struct</span> listen_sock *lopt = kzalloc(lopt_size, GFP_KERNEL);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (lopt == <span class="literal">NULL</span>)</div><div class="line">		<span class="keyword">return</span> -ENOMEM;</div><div class="line"></div><div class="line">	<span class="keyword">for</span> (lopt-&gt;max_qlen_log = <span class="number">6</span>;</div><div class="line">	     (<span class="number">1</span> &lt;&lt; lopt-&gt;max_qlen_log) &lt; sysctl_max_syn_backlog;</div><div class="line">	     lopt-&gt;max_qlen_log++);</div><div class="line"></div><div class="line">	get_random_bytes(&amp;lopt-&gt;hash_rnd, <span class="keyword">sizeof</span>(lopt-&gt;hash_rnd));</div><div class="line">	rwlock_init(&amp;<span class="built_in">queue</span>-&gt;syn_wait_lock);</div><div class="line">	<span class="built_in">queue</span>-&gt;rskq_accept_head = <span class="literal">NULL</span>;</div><div class="line">	lopt-&gt;nr_table_entries = nr_table_entries;</div><div class="line"></div><div class="line">	write_lock_bh(&amp;<span class="built_in">queue</span>-&gt;syn_wait_lock);</div><div class="line">	<span class="built_in">queue</span>-&gt;listen_opt = lopt;</div><div class="line">	write_unlock_bh(&amp;<span class="built_in">queue</span>-&gt;syn_wait_lock);</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>max_qlen_log的值受到sysctl_max_syn_backlog(对应的procfs位置为/proc/sys/net/ipv4/tcp_max_syn_backlog)的影响。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>由此我们可以知道，半连接个数的限制主要在这三个值：</p>
+<ul>
+<li>用户态调用listen()的第二个参数</li>
+<li>/proc/sys/net/ipv4/tcp_max_syn_backlog</li>
+<li>/proc/sys/net/core/somaxconn</li>
+</ul>
+<p>只要调整对应数据就可以大大减少SYN包不响应的问题，不过需要注意以下几点：</p>
+<ol>
+<li>如果上层是nginx，其在linux对应的backlog默认值为511，如果网络环境不太好或者并发太大，建议增大</li>
+<li>修改对应值时，注意先改两个系统值，再修改对应的应用层参数，否则不生效</li>
+<li>调整参数只能减少SYN包不响应出现的频率，不能完全消除。在网络堵塞或者突发性的并发量增大，也可能会出现类似情况</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/" data-id="ciy8pv6ly0007bnjxs6mwruzr" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tcp/">tcp</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          迁移blog到hexo
+        
+      </div>
+    </a>
+  
+  
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">systemtap (3) - array</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析"><span class="toc-number">2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决"><span class="toc-number">3.</span> <span class="toc-text">解决</span></a></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

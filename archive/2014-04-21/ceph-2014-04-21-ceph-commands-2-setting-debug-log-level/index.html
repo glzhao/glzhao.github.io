@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ceph commands (2) - setting debug log level | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一般情况下，当系统运行一切顺利时，我们无须开启log，这对系统资源是一种浪费。然而有时我们不管是debug还是了解系统运行情况都需要实时的查看修改参数。系统log的设置可以通过多种方式来设置，比如系统配置文件ceph.conf,linux下配置log 速率的logrotate，以及ceph提供的在线查看修改方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph commands (2) - setting debug log level">
+<meta property="og:url" content="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="一般情况下，当系统运行一切顺利时，我们无须开启log，这对系统资源是一种浪费。然而有时我们不管是debug还是了解系统运行情况都需要实时的查看修改参数。系统log的设置可以通过多种方式来设置，比如系统配置文件ceph.conf,linux下配置log 速率的logrotate，以及ceph提供的在线查看修改方式。">
+<meta property="og:updated_time" content="2017-01-22T13:23:03.639Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceph commands (2) - setting debug log level">
+<meta name="twitter:description" content="一般情况下，当系统运行一切顺利时，我们无须开启log，这对系统资源是一种浪费。然而有时我们不管是debug还是了解系统运行情况都需要实时的查看修改参数。系统log的设置可以通过多种方式来设置，比如系统配置文件ceph.conf,linux下配置log 速率的logrotate，以及ceph提供的在线查看修改方式。">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ceph-2014-04-21-ceph-commands-2-setting-debug-log-level" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/" class="article-date">
+  <time datetime="2014-04-20T16:04:27.000Z" itemprop="datePublished">2014-04-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ceph/">ceph</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ceph commands (2) - setting debug log level
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <p>一般情况下，当系统运行一切顺利时，我们无须开启log，这对系统资源是一种浪费。然而有时我们不管是debug还是了解系统运行情况都需要实时的查看修改参数。系统log的设置可以通过多种方式来设置，比如系统配置文件ceph.conf,linux下配置log 速率的logrotate，以及ceph提供的在线查看修改方式。</p>
+<a id="more"></a>
+<h2 id="log配置格式"><a href="#log配置格式" class="headerlink" title="log配置格式"></a>log配置格式</h2><p>每个ceph子系统都可以设置log level与memory level，分别表示输出的log和在内存中的log。ceph如果分别来设置这两个值，则需要以斜杠“/”来分开，前面的用来表示log level，后面的表示memory level，如：</p>
+<pre><code>debug ms = 1/5
+</code></pre><p>也可以只指定一个，那这两项就都会使用这个值。到ceph的log级别取值范围为1-20，1表示最少量log，20表示最多。在调试完之后最好将log级别调回默认或系统资源可以承受的级别，否则ceph的log会占用大量的资源。ceph系统默认的log级别可以参照<a href="http://ceph.com/docs/master/rados/troubleshooting/log-and-debug/#subsystem-log-and-debug-settings" target="_blank" rel="external">default log level</a></p>
+<h2 id="在配置文件中设置"><a href="#在配置文件中设置" class="headerlink" title="在配置文件中设置"></a>在配置文件中设置</h2><p>debug相关的设置是可以通过配置文件ceph.conf来指定的，如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[global]</div><div class="line">        debug ms = 1/5</div><div class="line"></div><div class="line">[mon]</div><div class="line">        debug mon = 20</div><div class="line">        debug paxos = 1/5</div><div class="line">        debug auth = 2</div><div class="line"></div><div class="line">[osd]</div><div class="line">        debug osd = 1/5</div><div class="line">        debug filestore = 1/5</div><div class="line">        debug journal = 1</div><div class="line">        debug monc = 5/20</div><div class="line"></div><div class="line">[mds]</div><div class="line">        debug mds = 1</div><div class="line">        debug mds balancer = 1</div><div class="line">        debug mds log = 1</div><div class="line">        debug mds migrator = 1</div></pre></td></tr></table></figure></p>
+<p>这比较适合debug ceph启动时的问题，但log会消耗系统资源，在系统没有问题时最好还是关闭，在需要时再打开。<br>ceph系统可以配置的log选项可见<a href="http://ceph.com/docs/master/rados/troubleshooting/log-and-debug/#logging-settings" target="_blank" rel="external">ceph log options</a></p>
+<h2 id="使用logrotate"><a href="#使用logrotate" class="headerlink" title="使用logrotate"></a>使用logrotate</h2><p>logrotate是一个管理linux下log文件相关的工具，可以用来压缩，转储，甚至邮寄log。ceph对应的配置文件路径为：<code>/var/logrotate.d/ceph</code>，其默认配置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/var/log/ceph/*.log &#123;</div><div class="line">    rotate 7</div><div class="line">    daily</div><div class="line">    compress</div><div class="line">    sharedscripts</div><div class="line">    postrotate</div><div class="line">        if which invoke-rc.d &gt; /dev/null 2&gt;&amp;1 &amp;&amp; [ -x `which invoke-rc.d` ]; then</div><div class="line">            invoke-rc.d ceph reload &gt;/dev/null</div><div class="line">        elif which service &gt; /dev/null 2&gt;&amp;1 &amp;&amp; [ -x `which service` ]; then</div><div class="line">            service ceph reload &gt;/dev/null</div><div class="line">        fi</div><div class="line">        # Possibly reload twice, but depending on ceph.conf the reload above may be a no-op</div><div class="line">        if which initctl &gt; /dev/null 2&gt;&amp;1 &amp;&amp; [ -x `which initctl` ]; then</div><div class="line">            # upstart reload isn&apos;t very helpful here:</div><div class="line">            #   https://bugs.launchpad.net/upstart/+bug/1012938</div><div class="line">            initctl list \</div><div class="line">                | sed -n &apos;s/^\(ceph-\(mon\|osd\|mds\)\+\)[ \t]\+(\([^ \/]\+\)\/\([^ \/]\+\))[ \t]\+start\/.*$/\1 cluster=\3 id=\4/p&apos; \</div><div class="line">                | while read l; do</div><div class="line">                initctl reload -- $l 2&gt;/dev/null || :</div><div class="line">            done</div><div class="line">        fi</div><div class="line">    endscript</div><div class="line">    missingok</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们可以通过修改其来指定log的一些参数，比如，log文件大小<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/var/log/ceph/*.log &#123;</div><div class="line">    rotate 7</div><div class="line">    daily</div><div class="line">    size 500M</div><div class="line">    compress</div><div class="line">    sharedscripts</div></pre></td></tr></table></figure></p>
+<p>然后使用<code>crontab -e</code>来增加如下一行：</p>
+<pre><code>30 * * * * /usr/sbin/logrotate /etc/logrotate.d/ceph &gt;/dev/null 2&gt;&amp;1
+</code></pre><p>表示每30分钟检查一下<code>/etc/logrotate.d/ceph</code>文件。</p>
+<h2 id="在线查看log-level"><a href="#在线查看log-level" class="headerlink" title="在线查看log level"></a>在线查看log level</h2><p>使用以下命令dump出指定daemon的所有配置：</p>
+<pre><code># ceph --admin-daemon {/path/to/admin/socket} config show | less
+</code></pre><p>也可以获取具体某项配置的值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># ceph --admin-daemon /var/run/ceph/ceph-mds.sjs_139_137.asok config get mon_lease</div><div class="line">&#123; &quot;mon_lease&quot;: &quot;5&quot;&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="在线修改log-level"><a href="#在线修改log-level" class="headerlink" title="在线修改log level"></a>在线修改log level</h2><p>在线修改log level可以有2种方式，<code>ceph tell</code>与<code>ceph --admin-daemon</code>两种方式，如：</p>
+<pre><code># ceph tell osd.0 injectargs &apos;--debug-osd 0/5&apos;
+</code></pre><p>这种方式通过monitors，所以凡是可以连接上monitor的都可以执行。</p>
+<pre><code># ceph --admin-daemon /var/run/ceph/ceph-osd.0.asok config set debug_osd 0/5
+</code></pre><p>该命令也可以达到相同的效果，不同是必须在osd.0所处的host上执行。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/" data-id="ciy8pv6lj0002bnjx92twzhpr" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ceph/">ceph</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/archive/2014-04-21/ceph-2014-04-21-introducing-cephx/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          introducing cephx
+        
+      </div>
+    </a>
+  
+  
+    <a href="/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">ceph commands (1) - view and modify options online</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#log配置格式"><span class="toc-number">1.</span> <span class="toc-text">log配置格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在配置文件中设置"><span class="toc-number">2.</span> <span class="toc-text">在配置文件中设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用logrotate"><span class="toc-number">3.</span> <span class="toc-text">使用logrotate</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在线查看log-level"><span class="toc-number">4.</span> <span class="toc-text">在线查看log level</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在线修改log-level"><span class="toc-number">5.</span> <span class="toc-text">在线修改log level</span></a></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

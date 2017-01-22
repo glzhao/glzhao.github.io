@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>systemtap (1) - introduction | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="开始简介systemtap是一个在线调试的瑞士军刀，可以为用户展示系统的很多细节，做性能分析,在线debug等。很多时候它被用来和solaris的Dtrace相提并论。看下官方介绍：
+
+SystemTap is a tracing and probing tool that allows users to study and monitor the activities of the comput">
+<meta property="og:type" content="article">
+<meta property="og:title" content="systemtap (1) - introduction">
+<meta property="og:url" content="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="开始简介systemtap是一个在线调试的瑞士军刀，可以为用户展示系统的很多细节，做性能分析,在线debug等。很多时候它被用来和solaris的Dtrace相提并论。看下官方介绍：
+
+SystemTap is a tracing and probing tool that allows users to study and monitor the activities of the comput">
+<meta property="og:updated_time" content="2017-01-22T13:23:54.123Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="systemtap (1) - introduction">
+<meta name="twitter:description" content="开始简介systemtap是一个在线调试的瑞士军刀，可以为用户展示系统的很多细节，做性能分析,在线debug等。很多时候它被用来和solaris的Dtrace相提并论。看下官方介绍：
+
+SystemTap is a tracing and probing tool that allows users to study and monitor the activities of the comput">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-tools-2014-04-24-systemtap-1-introduction" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/" class="article-date">
+  <time datetime="2014-04-24T14:26:43.000Z" itemprop="datePublished">2014-04-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools-kernel/">tools kernel</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      systemtap (1) - introduction
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>systemtap是一个在线调试的瑞士军刀，可以为用户展示系统的很多细节，做性能分析,在线debug等。<br>很多时候它被用来和solaris的Dtrace相提并论。看下官方介绍：</p>
+<blockquote>
+<p>SystemTap is a tracing and probing tool that allows users to study and monitor the activities of the computer system (particularly, the kernel) in fine detail. It provides information similar to the output of tools like netstat, ps, top, and iostat; however, SystemTap is designed to provide more filtering and analysis options for collected information.</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>要使用systemtap,除了必要的systemp包之外，还必须安装相应的debuginfo。</p>
+<h3 id="安装systemptap"><a href="#安装systemptap" class="headerlink" title="安装systemptap"></a>安装systemptap</h3><p>systemtap需要2个包，分别为systemtap,systemtap-runtime。如果使用yum包管理，使用如下命令：</p>
+<pre><code>yum install systemtap systemtap-runtime
+</code></pre><h3 id="安装debuginfo"><a href="#安装debuginfo" class="headerlink" title="安装debuginfo"></a>安装debuginfo</h3><h4 id="发行版自带"><a href="#发行版自带" class="headerlink" title="发行版自带"></a>发行版自带</h4><p>一般发行版都会自带运行内核对应的debuginfo，针对rhel需要安装的包如下：</p>
+<pre><code>yun install kernel-debuginfo kernel-debuginfo-common kernel-devel
+</code></pre><h4 id="手动build内核"><a href="#手动build内核" class="headerlink" title="手动build内核"></a>手动build内核</h4><p>内核开发很多时候需要手动编译upstream内核，此时需要使用-r 选项指定相关的目录.<br>如果-r制定一个目录，则stap会搜索目录中的debuginfo，如：</p>
+<pre><code>stap -r /path/to/kernel/build/tree [...]
+</code></pre><p>否则,stap会搜索/lib/modules/${RELEASE}/build/下的文件，如：</p>
+<pre><code>% stap -r RELEASE [...]
+</code></pre><h3 id="验证安装是否成功"><a href="#验证安装是否成功" class="headerlink" title="验证安装是否成功"></a>验证安装是否成功</h3><p>使用如下命令查看是否安装成功:</p>
+<pre><code>stap -v -e &apos;probe vfs.read {printf(&quot;Hello World\n&quot;); exit()}&apos;
+</code></pre><p>如果有如下类似输出，则说明安装成功。</p>
+<pre><code>Pass 1: parsed user script and 45 library script(s) in 340usr/0sys/358real ms.
+Pass 2: analyzed script: 1 probe(s), 1 function(s), 0 embed(s), 0 global(s) in 290usr/260sys/568real ms.
+Pass 3: translated to C into &quot;/tmp/stapiArgLX/stap_e5886fa50499994e6a87aacdc43cd392_399.c&quot; in 490usr/430sys/938real ms.
+Pass 4: compiled C into &quot;stap_e5886fa50499994e6a87aacdc43cd392_399.ko&quot; in 3310usr/430sys/3714real ms.
+Pass 5: starting run.
+read performed
+Pass 5: run completed in 10usr/40sys/73real ms.
+</code></pre><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>SystemTap内部工作步骤如下：</p>
+<ul>
+<li>SystemTap checks the script against the existing tapset library (normally in /usr/share/systemtap/tapset/ for any tapsets used. SystemTap will then substitute any located tapsets with their corresponding definitions in the tapset library.</li>
+<li>SystemTap then translates the script to C, running the system C compiler to create a kernel module from it. The tools that perform this step are contained in the systemtap package.</li>
+<li>SystemTap loads the module, then enables all the probes (events and handlers) in the script. The staprun in the systemtap-runtime package provides this functionality.</li>
+<li>As the events occur, their corresponding handlers are executed.</li>
+<li>Once the SystemTap session is terminated, the probes are disabled, and the kernel module is unloaded.</li>
+</ul>
+<h1 id="runtime-执行方式"><a href="#runtime-执行方式" class="headerlink" title="runtime 执行方式"></a>runtime 执行方式</h1><p>systemTap脚本是可以编译成模块，然后直接运行的.</p>
+<h3 id="编译systemtap脚本"><a href="#编译systemtap脚本" class="headerlink" title="编译systemtap脚本"></a>编译systemtap脚本</h3><p>编译systemp脚本格式如下：</p>
+<pre><code>stap -r kernel_version script -m module_name
+stap -r 2.6.18-92.1.10.el5 -e &apos;probe vfs.read {exit()}&apos; -m simple
+</code></pre><h3 id="运行编译后的模块"><a href="#运行编译后的模块" class="headerlink" title="运行编译后的模块"></a>运行编译后的模块</h3><p>使用staprun执行模块：</p>
+<pre><code>staprun module_name.ko
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/" data-id="ciy8pv6ma000hbnjxu42tlk6n" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/systemtap/">systemtap</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          systemtap (2) - grammar
+        
+      </div>
+    </a>
+  
+  
+    <a href="/archive/2014-04-21/ceph-2014-04-21-introducing-cephx/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">introducing cephx</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#开始"><span class="toc-number">1.</span> <span class="toc-text">开始</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#简介"><span class="toc-number">1.1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.2.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装systemptap"><span class="toc-number">1.2.1.</span> <span class="toc-text">安装systemptap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装debuginfo"><span class="toc-number">1.2.2.</span> <span class="toc-text">安装debuginfo</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#发行版自带"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">发行版自带</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#手动build内核"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">手动build内核</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#验证安装是否成功"><span class="toc-number">1.2.3.</span> <span class="toc-text">验证安装是否成功</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#原理"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#runtime-执行方式"><span class="toc-number">3.</span> <span class="toc-text">runtime 执行方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#编译systemtap脚本"><span class="toc-number">3.0.1.</span> <span class="toc-text">编译systemtap脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行编译后的模块"><span class="toc-number">3.0.2.</span> <span class="toc-text">运行编译后的模块</span></a></li></ol></li></ol></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

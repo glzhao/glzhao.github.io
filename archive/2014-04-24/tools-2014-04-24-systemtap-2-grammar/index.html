@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>systemtap (2) - grammar | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="语法SystemTap的语法与C,bash,awk有很多相似之处。其脚本主要有两部分构成，probe event，probe body,基本格式如下：
+probe event {body}
+probe event也可以有多个，以逗号隔开，如果有多个event，那么probe body执行的条件是任意一个探针被触发，可以说是“或”的关系。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="systemtap (2) - grammar">
+<meta property="og:url" content="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="语法SystemTap的语法与C,bash,awk有很多相似之处。其脚本主要有两部分构成，probe event，probe body,基本格式如下：
+probe event {body}
+probe event也可以有多个，以逗号隔开，如果有多个event，那么probe body执行的条件是任意一个探针被触发，可以说是“或”的关系。">
+<meta property="og:updated_time" content="2017-01-22T13:24:08.943Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="systemtap (2) - grammar">
+<meta name="twitter:description" content="语法SystemTap的语法与C,bash,awk有很多相似之处。其脚本主要有两部分构成，probe event，probe body,基本格式如下：
+probe event {body}
+probe event也可以有多个，以逗号隔开，如果有多个event，那么probe body执行的条件是任意一个探针被触发，可以说是“或”的关系。">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-tools-2014-04-24-systemtap-2-grammar" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/" class="article-date">
+  <time datetime="2014-04-24T14:36:12.000Z" itemprop="datePublished">2014-04-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools-kernel/">tools kernel</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      systemtap (2) - grammar
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h1 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h1><p>SystemTap的语法与C,bash,awk有很多相似之处。其脚本主要有两部分构成，probe event，<br>probe body,基本格式如下：</p>
+<pre><code>probe event {body}
+</code></pre><p>probe event也可以有多个，以逗号隔开，如果有多个event，那么probe body<br>执行的条件是任意一个探针被触发，可以说是“或”的关系。</p>
+<a id="more"></a>
+<h2 id="命令行参数"><a href="#命令行参数" class="headerlink" title="命令行参数"></a>命令行参数</h2><p>SystemTap允许用户使用简单的命令行参数。使用$表示参数为整数，@表示参数为字符串，如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">probe kernel.function(@1) &#123; &#125;</div><div class="line">probe kernel.function(@1).return &#123;&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="event"><a href="#event" class="headerlink" title="event"></a>event</h2><p>SystemTap支持很多种类的probe event，具体可见man stapprobes.</p>
+<p>systemptap的event主要分为两类，同步与异步, 在设置event时还可以使用通配符“*”<br>表示所有符合条件的event。</p>
+<h3 id="同步event"><a href="#同步event" class="headerlink" title="同步event"></a>同步event</h3><p>同步event发生在进程执行某一条确定的命令时，比如：</p>
+<ul>
+<li><p>系统调用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">syscall.system_call</div><div class="line">syscall.system_call.return</div><div class="line">syscall.read</div><div class="line">syscall.read.return</div></pre></td></tr></table></figure>
+</li>
+<li><p>vfs</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">vfs.file_operation</div><div class="line">vfs.file_operation.return</div><div class="line">vfs.read</div><div class="line">vfs.read.return</div></pre></td></tr></table></figure>
+</li>
+<li><p>内核函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">kernel.function(&quot;function&quot;)</div><div class="line">kernel.function(&quot;function&quot;).return</div><div class="line">kernel.function(&quot;sys_open&quot;)</div><div class="line">kernel.function(&quot;sys_open&quot;).return</div></pre></td></tr></table></figure>
+</li>
+<li><p>文件位置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">kernel.function(&quot;*@net/socket.c&quot;)</div><div class="line">kernel.function(&quot;*@net/socket.c&quot;).return</div></pre></td></tr></table></figure>
+</li>
+<li><p>tracepoint</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">kernel.trace(&quot;tracepoint&quot;)</div><div class="line">kernel.trace(&quot;kfree_skb&quot;)</div></pre></td></tr></table></figure>
+</li>
+<li><p>内核模块</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">module(&quot;module&quot;).function(&quot;function&quot;)</div><div class="line">module(&quot;module&quot;).function(&quot;function&quot;).return</div><div class="line">probe module(&quot;ext3&quot;).function(&quot;*&quot;)</div><div class="line">probe module(&quot;ext3&quot;).function(&quot;*&quot;).return</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="异步event"><a href="#异步event" class="headerlink" title="异步event"></a>异步event</h3><p>异步event不是执行到指定的指令或代码位置，这一类包括计时器，定时器等</p>
+<ul>
+<li>begin</li>
+<li>end</li>
+<li><p>timer events, 如：</p>
+<p>  probe timer.s(4) {statement}</p>
+</li>
+</ul>
+<p>表示每4秒执行一次statement.<br>也可以有如下格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">timer.ms(milliseconds)</div><div class="line">timer.us(microseconds)</div><div class="line">timer.ns(nanoseconds)</div><div class="line">timer.hz(hertz)</div><div class="line">timer.jiffies(jiffies)</div></pre></td></tr></table></figure>
+<h2 id="probe-body"><a href="#probe-body" class="headerlink" title="probe body"></a>probe body</h2><h3 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h3><p>systemptap也支持函数，定义格式如下：</p>
+<pre><code>function function_name(arguments) {statements}
+</code></pre><p>调用格式如下：</p>
+<pre><code>probe event {function_name(arguments)}
+</code></pre><h3 id="内建"><a href="#内建" class="headerlink" title="内建"></a>内建</h3><ul>
+<li>name  系统调用的名称，这个变量只能在probe系统调用时使用</li>
+<li><p>printf(),可以用来打印信息，与C语言中的printf十分相似，例：</p>
+<p>  printf(“Hello %s\n”, arguments)</p>
+</li>
+<li><p>tid() The ID of the current thread.</p>
+</li>
+<li>uid() The ID of the current user.</li>
+<li>cpu() The current CPU number.</li>
+<li>gettimeofday_s() The number of seconds since UNIX epoch (January 1, 1970).</li>
+<li>ctime() Convert number of seconds since UNIX epoch to date.</li>
+<li>pp() A string describing the probe point currently being handled.</li>
+<li>thread_indent() 输出当前probe所处的可执行程序名称、线程id、函数执行的相对时间和执行的次数等</li>
+<li>target() 在stap 脚本通过-x 或-c 指定要检测的任务时使用，如：<br>  probe syscall.* {<pre><code>if (pid() == target())
+    printf(&quot;%s/n&quot;, name)
+</code></pre>  }</li>
+</ul>
+<p>通过man stapfuncs获取更多函数</p>
+<h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>SystemTap的变量可以全局随处定义，使用。其类型会随着赋值的进行自动识别。它们默认<br>是局部变量，如果想全区使用，需要关键字global。如：</p>
+<pre><code>global count_ms
+</code></pre><h3 id="target变量"><a href="#target变量" class="headerlink" title="target变量"></a>target变量</h3><p>probe event 会映射到代码的一个确定位置，允许target变量获取该处代码可见变量的值，<br>可以通过-L选项列出这些变量,如：</p>
+<pre><code>stap -L &apos;kernel.function(&quot;vfs_read&quot;)&apos;
+</code></pre><p>如果已经安装debuginfo，会有类似如下的输出：</p>
+<pre><code>kernel.function(&quot;vfs_read@fs/read_write.c:277&quot;) $file:struct file* $buf:char* $count:size_t $pos:loff_t*
+</code></pre><p>每一个target变量都以$开头，”:“后面的表示类型。如果一个target变量不是本地变量，而是<br>一个全局，外部变量，或是本地定义的静态变量，可能以如下方式表示：</p>
+<pre><code>@var(&quot;varname@src/file.c&quot;)
+</code></pre><h4 id="检查target变量"><a href="#检查target变量" class="headerlink" title="检查target变量"></a>检查target变量</h4><p>随着代码的改变，target 变量也可能会变化。@defined测试是否一个target变量可访问,如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">probe vm.pagefault = kernel.function(&quot;__handle_mm_fault@mm/memory.c&quot;) ?,</div><div class="line">                     kernel.function(&quot;handle_mm_fault@mm/memory.c&quot;) ?</div><div class="line">	&#123;</div><div class="line">	        name = &quot;pagefault&quot;</div><div class="line">	        write_access = (@defined($flags) ? $flags &amp; FAULT_FLAG_WRITE : $write_access)</div><div class="line">		address =  $address</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="gt"><a href="#gt" class="headerlink" title="-&gt;"></a>-&gt;</h4><p>SystemTap变量可以使用-&gt;获取结构的成员，如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">stap -e &apos;probe kernel.function(&quot;vfs_read&quot;) &#123;</div><div class="line">	printf (&quot;current files_stat max_files: %d\n&quot;,</div><div class="line">			@var(&quot;files_stat@fs/file_table.c&quot;)-&gt;max_files);</div><div class="line">	exit();</div><div class="line">&#125;&apos;</div></pre></td></tr></table></figure></p>
+<h4 id="获取内核态数据"><a href="#获取内核态数据" class="headerlink" title="获取内核态数据"></a>获取内核态数据</h4><p>对于内核中指向基本数据类型的指针，有一系列的辅助函数可一获取相关值。</p>
+<ul>
+<li>kernel_char(address) Obtain the character at address from kernel memory.</li>
+<li>kernel_short(address) Obtain the short at address from kernel memory.</li>
+<li>kernel_int(address) Obtain the int at address from kernel memory.</li>
+<li>kernel_long(address) Obtain the long at address from kernel memory</li>
+<li>kernel_string(address) Obtain the string at address from kernel memory.</li>
+<li>kernel_string_n(address, n) Obtain the string at address from the kernel memory and limits the string to n bytes.</li>
+</ul>
+<h4 id="特殊变量"><a href="#特殊变量" class="headerlink" title="特殊变量"></a>特殊变量</h4><p>$$vars 扩展为 sprintf(“parm1=%x … parmN=%x var1=%x … varN=%x”, parm1, …, parmN, var1, …, varN)<br>参数为probe监视点上的每个变量</p>
+<p>$$locals 扩展为本地变量集</p>
+<p>$$parms 扩展为函数参数集,如：</p>
+<pre><code>stap -e &apos;probe kernel.function(&quot;vfs_read&quot;) {printf(&quot;%s\n&quot;, $$parms); exit(); }&apos;
+</code></pre><p>vfs_read有4个参数vfs_read: file, buf, count, pos,所以会有类似输出：</p>
+<pre><code>file=0xffff8800b40d4c80 buf=0x7fff634403e0 count=0x2004 pos=0xffff8800af96df48
+</code></pre><p>看到指针没有特别意义，如果想看到具体的值，可以使用“$”作为后缀，如：</p>
+<pre><code>stap -e &apos;probe kernel.function(&quot;vfs_read&quot;) {printf(&quot;%s\n&quot;, $$parms$); exit(); }&apos;
+</code></pre><p>这样就会打印指针域具体的值，会有如下类似输出：</p>
+<pre><code>file={.f_u={...}, .f_path={...}, .f_op=0xffffffffa06e1d80, .f_lock={...}, .f_count={...}, .f_flags=34818, .f_mode=31, .f_pos=0, .f_owner={...}, .f_cred=0xffff88013148fc80, .f_ra={...}, .f_version=0, .f_security=0xffff8800b8dce560, .private_data=0x0, .f_ep_links={...}, .f_mapping=0xffff880037f8fdf8} buf=&quot;&quot; count=8196 pos=-131938753921208
+</code></pre><p>使用”$“做为后缀不会扩展内嵌的结构，如果想看到所有的内嵌结构展开，可以使用“$$”后缀，如：</p>
+<pre><code>stap -e &apos;probe kernel.function(&quot;vfs_read&quot;) {printf(&quot;%s\n&quot;, $$parms$$); exit(); }&apos;
+</code></pre><p>会有如下类似输出：</p>
+<pre><code>file={.f_u={.fu_list={.next=0xffff8801336ca0e8, .prev=0xffff88012ded0840}, .fu_rcuhead={.next=0xffff8801336ca0e8, .func=0xffff88012ded0840}}, .f_path={.mnt=0xffff880132fc97c0, .dentry=0xffff88001a889cc0}, .f_op=0xffffffffa06f64c0, .f_lock={.raw_lock={.slock=196611}}, .f_count={.counter=2}, .f_flags=34818, .f_mode=31, .f_pos=0, .f_owner={.lock={.raw_lock={.lock=16777216}}, .pid=0x0, .pid_type=0, .uid=0, .euid=0, .signum=0}, .f_cred=0xffff880130129a80, .f_ra={.start=0, .size=0, .async_size=0, .ra_pages=32, .}}
+</code></pre><p>$$return 扩展为 sprintf(“return=%x”, $return), 只可以用于return probe.</p>
+<h3 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h3><p>大部分情况下，SystemTap可以自动识别变量类型，但是有时会有void类型的变量,<br>systemtap提供了@cast操作累识别正确类型.@cast的第一个参数是结构的指针，<br>第二个是cast要转换的目标类型。第三个指定类型定义的文件，如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">function task_state:long (task:long) &#123;</div><div class="line">	return @cast(task, &quot;task_struct&quot;, &quot;kernel&lt;linux/sched.h&gt;&quot;)-&gt;state</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>该函数返回long参数指向的task_struct结构的成员state的值.</p>
+<h3 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h3><p>可用的条件语句if,while,for, ==, &gt;=, &lt;=, !=等,其语法与C相似，只是语句末尾不需加分号。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/" data-id="ciy8pv6me000jbnjxl3meywik" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/systemtap/">systemtap</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          systemtap (3) - array
+        
+      </div>
+    </a>
+  
+  
+    <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">systemtap (1) - introduction</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#语法"><span class="toc-number">1.</span> <span class="toc-text">语法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#命令行参数"><span class="toc-number">1.1.</span> <span class="toc-text">命令行参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#event"><span class="toc-number">1.2.</span> <span class="toc-text">event</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#同步event"><span class="toc-number">1.2.1.</span> <span class="toc-text">同步event</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步event"><span class="toc-number">1.2.2.</span> <span class="toc-text">异步event</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#probe-body"><span class="toc-number">1.3.</span> <span class="toc-text">probe body</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义函数"><span class="toc-number">1.3.1.</span> <span class="toc-text">自定义函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内建"><span class="toc-number">1.3.2.</span> <span class="toc-text">内建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#变量"><span class="toc-number">1.3.3.</span> <span class="toc-text">变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#target变量"><span class="toc-number">1.3.4.</span> <span class="toc-text">target变量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#检查target变量"><span class="toc-number">1.3.4.1.</span> <span class="toc-text">检查target变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#gt"><span class="toc-number">1.3.4.2.</span> <span class="toc-text">-></span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#获取内核态数据"><span class="toc-number">1.3.4.3.</span> <span class="toc-text">获取内核态数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#特殊变量"><span class="toc-number">1.3.4.4.</span> <span class="toc-text">特殊变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#类型转换"><span class="toc-number">1.3.5.</span> <span class="toc-text">类型转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#条件语句"><span class="toc-number">1.3.6.</span> <span class="toc-text">条件语句</span></a></li></ol></li></ol></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>build kernel | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Kernel Build processes##1. Creating a configuration file
+###a. Use a newly created .config
+1$ make config">
+<meta property="og:type" content="article">
+<meta property="og:title" content="build kernel">
+<meta property="og:url" content="http://glzhao.github.io/archive/2014-04-13/kernel-2014-04-13-build-kernel/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="Kernel Build processes##1. Creating a configuration file
+###a. Use a newly created .config
+1$ make config">
+<meta property="og:updated_time" content="2017-01-22T13:22:10.355Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="build kernel">
+<meta name="twitter:description" content="Kernel Build processes##1. Creating a configuration file
+###a. Use a newly created .config
+1$ make config">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-kernel-2014-04-13-build-kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2014-04-13/kernel-2014-04-13-build-kernel/" class="article-date">
+  <time datetime="2014-04-13T13:37:56.000Z" itemprop="datePublished">2014-04-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/kernel/">kernel</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      build kernel
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h1 id="Kernel-Build-processes"><a href="#Kernel-Build-processes" class="headerlink" title="Kernel Build processes"></a>Kernel Build processes</h1><p>##1. Creating a configuration file</p>
+<p>###a. Use a newly created .config</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make config</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>###b. Use default .config</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make defconfig</div></pre></td></tr></table></figure>
+<p>###c. Use running OS’s .config</p>
+<p>####1. Get from procfs </p>
+<p>If the kernel configuration is hard to find, look in the kernel itself. Most distribution kernels<br>are built to include the configuration within the /proc filesystem</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ zcat /proc/config.gz &gt; .config</div></pre></td></tr></table></figure>
+<p>####2. Get from  /user/src/linux</p>
+<p>Almost all distributions provide the kernel configuration files as part of the distribution<br>kernel package. Read the distribution-specific documentation for how to find these configurations.<br>It is usually somewhere below the /usr/src/linux/ directory tree.</p>
+<p>####3. Use oldconfig </p>
+<p><code>make oldconfig</code> takes the current kernel configuration in the .config file, and updates it<br>based on the new kernel release. To do this, it prints out all configuration questions,<br>and provides an answer for them if the option is already handled in the configuration file.<br>If there is a new option, the program stops and asks the user what the new configuration<br>value should be set to. After answering the prompt, the program continues on until the<br>whole kernel configuration is finished.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make oldconfig</div></pre></td></tr></table></figure>
+<p>####4. Use silentoldconfig </p>
+<p><code>make silentoldconfig</code> works exactly the same way as oldconfig does, but it does not print<br>anything to the screen, unless it needs to ask a question about a new configuration option.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make silentoldconfig</div></pre></td></tr></table></figure>
+<p>##2. Modifying the configuration file</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make menuconfig</div></pre></td></tr></table></figure>
+<p>or</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make xconfmig</div></pre></td></tr></table></figure>
+<p>or</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make gconfig</div></pre></td></tr></table></figure>
+<p>##3. Building the kernel</p>
+<p>a). make</p>
+<p>This commond check all changed object files and do the final kernel image link properly</p>
+<p>b). make -j $n</p>
+<p>It is best to give a number to the -j option that corresponds to twice the number<br>of processors in the system. So, for a machine with 2 processors present, use <code>make -j4</code> </p>
+<p>c). make -j</p>
+<p>The build system will create a new thread for every subdirectory in the kernel tree,<br>which can easily cause your machine to become unresponsive and take a much longer time<br>to complete the build. Because of this, it is recommended that you always pass a number<br>to the -j option</p>
+<p>NOTE:<br>Older kernel versions prior to the 2.6 release required the additional step of make modules<br>to build all needed kernel modules. That is no longer required now.</p>
+<p>##4. Installing and Booting From a Kernel</p>
+<h3 id="Using-a-Distribution’s-Installation-Scripts"><a href="#Using-a-Distribution’s-Installation-Scripts" class="headerlink" title="Using a Distribution’s Installation Scripts"></a>Using a Distribution’s Installation Scripts</h3><p>####1. Install kernel modules</p>
+<p>Install all the modules which have built and place them in the proper location in the filesystem<br>for the new kernel to properly find. Modules are placed in the /lib/modules/KERNEL_VERSION<br>directory, where KERNEL_VERSION is the kernel version of the new kernel you have just built.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make modules_install</div></pre></td></tr></table></figure>
+<p>####2. Install kernel image</p>
+<p>Use the following command:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make install</div></pre></td></tr></table></figure>
+<p>This commond include the following processes:</p>
+<ul>
+<li><p>The kernel build system will verify that the kernel has been successfully built properly.</p>
+</li>
+<li><p>The build system will install the static kernel portion into the /boot directory and name<br>this executable file based on the kernel version of the built kernel.</p>
+</li>
+<li><p>Any needed initial ramdisk images will be automatically created, using the modules that<br>have just been installed during the modules_install phase.</p>
+</li>
+<li><p>The bootloader program will be properly notified that a new kernel is present, and it will<br>be added to the appropriate menu so the user can select it the next the machine is booted.</p>
+</li>
+</ul>
+<h3 id="Installing-By-Hand"><a href="#Installing-By-Hand" class="headerlink" title="Installing By Hand"></a>Installing By Hand</h3><p>####1. Install modules</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make mdoules_install</div></pre></td></tr></table></figure>
+<p>####2. Copy the static kernel image into the /boot directory</p>
+<p>a). Get kernel version</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make kernelversion</div></pre></td></tr></table></figure>
+<p>b). Copy image and system.map</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cp arch/i386/boot/bzImage /boot/bzImage-KERNEL_VERSION</div><div class="line">$ cp System.map /boot/System.map-KERNEL_VERSION</div></pre></td></tr></table></figure>
+<p>c). Modify the bootloader so it knows about the new kernel. This involves editing a configuration file for the bootloader you use.</p>
+<p>For GRUB:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi /boot/grub/memu.lst</div><div class="line">$ reboot</div></pre></td></tr></table></figure>
+<p>For LILO:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi /etc/lilo.conf</div><div class="line">$ /sbin/lilo</div></pre></td></tr></table></figure></p>
+<p>The second comand <code>/sbin/lilo</code> write the configuration changes out to the boot section of the disk.</p>
+<p>NOTE:<br>The kernel version will probably be different for your kernel. Use this value in place of the<br>text KERNEL_VERSION in all of the following steps, and you can find the script on the Note 3.</p>
+<h1 id="NOTE"><a href="#NOTE" class="headerlink" title="NOTE:"></a>NOTE:</h1><p>###1. Permissions </p>
+<p>Do <strong>not</strong> configure or build your kernel with <strong>superuser permissions</strong> enabled!</p>
+<p>There have been bugs in the kernel build process in the past, causing some special files<br>in the /dev directory to be deleted if the user had superuser permissions while building<br>the Linux kernel. </p>
+<p>There are also issues that can easily arise when uncompressing the Linux kernel with<br>superuser rights, as some of the files in the kernel source package will not end up with<br>the proper permissions and will cause build errors later.</p>
+<p>###2. Place for kernel source code </p>
+<p>The kernel source code should also <strong>never</strong> be placed in the /usr/src/linux/ directory.</p>
+<p>The location of the kernel that the system libraries were built against, not your new<br>custom kernel. Do not do any kernel development under the /usr/src/ directory tree at all,<br>but only in a local user directory where nothing bad can happen to the system.</p>
+<p>###3. A script used to install the kernel automatically</p>
+<p>Here is a handy script that can be used to install the kernel automatically instead of<br>having to type the previous commands all the time.</p>
+<p>As following:</p>
+<pre><code>#!/bin/sh
+
+# installs a kernel
+make modules_install
+
+# find out what kernel version this is
+for TAG in VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION ; do
+    eval `sed -ne &quot;/^$TAG/s/ //gp&quot; Makefile`
+done
+
+SRC_RELEASE=$VERSION.$PATCHLEVEL.$SUBLEVEL$EXTRAVERSION
+
+# figure out the architecture
+ARCH=`grep &quot;CONFIG_ARCH &quot; include/linux/autoconf.h | cut -f 2 -d &quot;\&quot;&quot;`
+
+# copy the kernel image
+cp arch/$ARCH/boot/bzImage /boot/bzImage-&quot;$SRC_RELEASE&quot;
+
+# copy the System.map file
+cp System.map /boot/System.map-&quot;$SRC_RELEASE&quot;
+
+echo &quot;Installed $SRC_RELEASE for $ARCH&quot;
+</code></pre><p>###4. Which patch applies to which release</p>
+<p>A kernel patch file only will upgrade the source code from one specific release to<br>another specific release. Here is how the different patch files can be applied:</p>
+<ul>
+<li><p>Stable kernel patches apply to the base kernel version. This means that the 2.6.17.10<br>patch will only apply to the 2.6.17 kernel release. The 2.6.17.10 kernel patch will not<br>apply to the 2.6.17.9 kernel or any other release.</p>
+</li>
+<li><p>Base kernel release patches only apply to the previous base kernel version. This means<br>that the 2.6.18 patch will only apply to the 2.6.17 kernel release. It will not apply to<br>the last 2.6.17.y kernel release, or any other release.</p>
+</li>
+<li><p>Incremental patches upgrade from a specific release to the next release. This allows<br>developers to not have to downgrade their kernel and then upgrade it, just to switch from<br>the latest stable release to the next stable release (remember that the stable release<br>patches are only against the base kernel, not the previous stable release.) Whenever<br>possible, it is recommended that you use the incremental patches to make your life easier.</p>
+</li>
+</ul>
+<p>###5. Finding the patch</p>
+<p>The stable and base kernel patches are located in the same directory structure as the main<br>source trees. All incremental patches can be found one level lower, in the incr subdirectory.<br>So, to find the patch that goes from 2.6.17.9 to 2.6.17.10, we look in the<br>/pub/linux/kernel/v2.6/incr directory to find the files we need.</p>
+<p>###6. Device discovery</p>
+<p>Here are the steps needed to find the driver for a device that has a working driver already bound<br>to it:</p>
+<ol>
+<li><p>Find the proper sysfs class device that the device is bound to. Network devices are listed in<br>/sys/class/net and tty devices in /sys/class/tty. Other types of devices are listed in other<br>directories in /sys/class, depending on the type of device.</p>
+</li>
+<li><p>Trace through the sysfs tree to find the module name that controls this device. It will be found<br>in the /sys/class/class_name/device_name/device/driver/ module, and can be displayed using the<br>readlink and basename applications:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ basename `readlink /sys/class/class_name/device_name/device/driver/module`</div></pre></td></tr></table></figure>
+</li>
+<li><p>Search the kernel Makefiles for the CONFIG_ rule that builds this module name by using find and grep:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ find -type f -name Makefile | xargs grep module_name</div></pre></td></tr></table></figure>
+</li>
+<li><p>Search in the kernel configuration system for that configuration value and go to the location<br>in the menu that it specifies to enable that driver to be built.</p>
+</li>
+<li><p>Print a list of all of the modules that are needed to control all devices in the system</p>
+</li>
+</ol>
+<p>The script is as following:</p>
+<pre><code>#!/bin/bash
+#
+# find_all_modules.sh
+#
+
+for i in `find /sys/ -name modalias -exec cat {} \;`; do
+/sbin/modprobe --config /dev/null --show-depends $i ;
+done | rev | cut -f 1 -d &apos;/&apos; | rev | sort -u
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2014-04-13/kernel-2014-04-13-build-kernel/" data-id="ciy8pv6lx0006bnjx1cc3g7nm" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kernel/">kernel</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          ceph commands (1) - view and modify options online
+        
+      </div>
+    </a>
+  
+  
+    <a href="/archive/2014-03-22/others-2014-03-22-hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kernel-Build-processes"><span class="toc-number">1.</span> <span class="toc-text">Kernel Build processes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Using-a-Distribution’s-Installation-Scripts"><span class="toc-number">1.0.1.</span> <span class="toc-text">Using a Distribution’s Installation Scripts</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Installing-By-Hand"><span class="toc-number">1.0.2.</span> <span class="toc-text">Installing By Hand</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#NOTE"><span class="toc-number">2.</span> <span class="toc-text">NOTE:</span></a></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>
