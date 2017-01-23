@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>find命令示例 | Guangliang Zhao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="用文件名查找文件$ find . -name ${file_name}
+用文件名查找文件，忽略名称的大小写$ find . -iname ${file_name}
+限定搜索目录的深度$ find . -mindepth 2  -maxdepth 5 -name ${file_name}
+在find命令查找到的文件上执行命令$ find . -name ${file_name} -exec md5s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="find命令示例">
+<meta property="og:url" content="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/index.html">
+<meta property="og:site_name" content="Guangliang Zhao">
+<meta property="og:description" content="用文件名查找文件$ find . -name ${file_name}
+用文件名查找文件，忽略名称的大小写$ find . -iname ${file_name}
+限定搜索目录的深度$ find . -mindepth 2  -maxdepth 5 -name ${file_name}
+在find命令查找到的文件上执行命令$ find . -name ${file_name} -exec md5s">
+<meta property="og:updated_time" content="2017-01-23T03:16:03.146Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="find命令示例">
+<meta name="twitter:description" content="用文件名查找文件$ find . -name ${file_name}
+用文件名查找文件，忽略名称的大小写$ find . -iname ${file_name}
+限定搜索目录的深度$ find . -mindepth 2  -maxdepth 5 -name ${file_name}
+在find命令查找到的文件上执行命令$ find . -name ${file_name} -exec md5s">
+  
+    <link rel="alternate" href="/atom.xml" title="Guangliang Zhao" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://glzhao.github.io"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Guangliang Zhao</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">printk(KERN_DEBUG &quot;%s&quot;, &quot;I am Guangliang Zhao&quot;)</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-cli-2017-01-23-find命令示例" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2017-01-23/cli-2017-01-23-find命令示例/" class="article-date">
+  <time datetime="2017-01-23T03:02:15.000Z" itemprop="datePublished">2017-01-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cli/">cli</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      find命令示例
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h4 id="用文件名查找文件"><a href="#用文件名查找文件" class="headerlink" title="用文件名查找文件"></a>用文件名查找文件</h4><pre><code>$ find . -name ${file_name}
+</code></pre><h4 id="用文件名查找文件，忽略名称的大小写"><a href="#用文件名查找文件，忽略名称的大小写" class="headerlink" title="用文件名查找文件，忽略名称的大小写"></a>用文件名查找文件，忽略名称的大小写</h4><pre><code>$ find . -iname ${file_name}
+</code></pre><h4 id="限定搜索目录的深度"><a href="#限定搜索目录的深度" class="headerlink" title="限定搜索目录的深度"></a>限定搜索目录的深度</h4><pre><code>$ find . -mindepth 2  -maxdepth 5 -name ${file_name}
+</code></pre><h4 id="在find命令查找到的文件上执行命令"><a href="#在find命令查找到的文件上执行命令" class="headerlink" title="在find命令查找到的文件上执行命令"></a>在find命令查找到的文件上执行命令</h4><pre><code>$ find . -name ${file_name} -exec md5sum {} \;
+</code></pre><h4 id="find命令条件取反"><a href="#find命令条件取反" class="headerlink" title="find命令条件取反"></a>find命令条件取反</h4><pre><code>$ find . -maxdepth 2 -not -name ${file_name}
+</code></pre><h4 id="查找指定inode号的文件，并改名"><a href="#查找指定inode号的文件，并改名" class="headerlink" title="查找指定inode号的文件，并改名"></a>查找指定inode号的文件，并改名</h4><pre><code>$ find . -inum ${inode_num} -exec mv {} ${new_name} \;
+</code></pre><h4 id="根据文件权限查找文件-对组用户具有只读权限"><a href="#根据文件权限查找文件-对组用户具有只读权限" class="headerlink" title="根据文件权限查找文件(对组用户具有只读权限)"></a>根据文件权限查找文件(对组用户具有只读权限)</h4><pre><code>$ find . -perm -g=r -type f -exec ls -l {} \;
+$ find . -perm 040 -type f -exec ls -l {} \;
+</code></pre><h4 id="查找非隐藏空文件"><a href="#查找非隐藏空文件" class="headerlink" title="查找非隐藏空文件"></a>查找非隐藏空文件</h4><pre><code>$ find . -maxdepth 1 -empty -not -name &quot;.*&quot; 
+</code></pre><h4 id="找出5个最大的文件"><a href="#找出5个最大的文件" class="headerlink" title="找出5个最大的文件"></a>找出5个最大的文件</h4><pre><code>$ find . -type f -exec ls -s {} \; |sort -n -r |head -5
+</code></pre><h4 id="使用-type-查找指定类型的文件"><a href="#使用-type-查找指定类型的文件" class="headerlink" title="使用-type 查找指定类型的文件"></a>使用-type 查找指定类型的文件</h4><pre><code>$ find . -type f/d/s(socket文件)
+</code></pre><h4 id="查找在指定文件（修改，访问，状态变更）之后被访问的所有文件"><a href="#查找在指定文件（修改，访问，状态变更）之后被访问的所有文件" class="headerlink" title="查找在指定文件（修改，访问，状态变更）之后被访问的所有文件"></a>查找在指定文件（修改，访问，状态变更）之后被访问的所有文件</h4><pre><code>$ find . -newer ${file_name}
+$ find . -anewer ${file_name}
+</code></pre><h4 id="通过文件大小查找文件"><a href="#通过文件大小查找文件" class="headerlink" title="通过文件大小查找文件"></a>通过文件大小查找文件</h4><pre><code>$ find . -size 100M/-100M/+100M
+</code></pre><h4 id="根据时间查找文件"><a href="#根据时间查找文件" class="headerlink" title="根据时间查找文件"></a>根据时间查找文件</h4><ul>
+<li>在60分钟内被访问的文件及目录<br>  <code>$ find . -amin -60</code></li>
+<li>在1天内被访问的文件及目录<br>  <code>$ find . -atmie -1</code></li>
+<li>在60分钟内被修改（数据）的文件及目录<br>  <code>$ find . -mmin -60</code> </li>
+<li>在1天内被修改（数据）的文件及目录<br>  <code>$ find . -mtime -1</code></li>
+<li>在60分钟内状态被更改(元数据或权限)的文件及目录<br>  <code>$ find . -cmin -60</code></li>
+<li>在1天内状态被更改（元数据或权限）的文件及目录<br>  <code>$ find . -ctime -1</code></li>
+</ul>
+<h4 id="仅在当前文件系统中搜索"><a href="#仅在当前文件系统中搜索" class="headerlink" title="仅在当前文件系统中搜索"></a>仅在当前文件系统中搜索</h4><pre><code>$ find / -xdev -name ${file_name}
+</code></pre><h4 id="在find命令中使用多个"><a href="#在find命令中使用多个" class="headerlink" title="在find命令中使用多个{}"></a>在find命令中使用多个{}</h4><pre><code>$ find . -name &quot;*.txt&quot; -exec mv {} {}.bak \;
+</code></pre><h4 id="将文件名中的空格换为下划线"><a href="#将文件名中的空格换为下划线" class="headerlink" title="将文件名中的空格换为下划线"></a>将文件名中的空格换为下划线</h4><pre><code>$ find . -type f -iname “*.mp3″ -exec rename “s/ /_/g” {} \;
+</code></pre><h4 id="find多个条件关系为或"><a href="#find多个条件关系为或" class="headerlink" title="find多个条件关系为或"></a>find多个条件关系为或</h4><pre><code>$ find . \(-name &quot;*.txt&quot; -o -name &quot;*.pdf&quot; \) -prinf
+</code></pre><h4 id="使用正则表达式查找"><a href="#使用正则表达式查找" class="headerlink" title="使用正则表达式查找"></a>使用正则表达式查找</h4><pre><code>$ find . -regex &quot;.*\(\.txt|\.pdf\)$&quot;
+$ find . -iregex &quot;.*\(\.txt|\.pdf\)$&quot;
+</code></pre><h4 id="否定参数-查找非txt文件"><a href="#否定参数-查找非txt文件" class="headerlink" title="否定参数(查找非txt文件)"></a>否定参数(查找非txt文件)</h4><pre><code>$ find . ! -name &quot;*.txt&quot; -print
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/" data-id="ciy9k9ofs000bq4jxsj89qm2i" class="article-share-link">分享</a>
+      
+      
+        <a href="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bash/">bash</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/archive/2017-01-23/cli-2017-01-23-sed简介/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">sed简介</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#用文件名查找文件"><span class="toc-number">1.</span> <span class="toc-text">用文件名查找文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#用文件名查找文件，忽略名称的大小写"><span class="toc-number">2.</span> <span class="toc-text">用文件名查找文件，忽略名称的大小写</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#限定搜索目录的深度"><span class="toc-number">3.</span> <span class="toc-text">限定搜索目录的深度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#在find命令查找到的文件上执行命令"><span class="toc-number">4.</span> <span class="toc-text">在find命令查找到的文件上执行命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#find命令条件取反"><span class="toc-number">5.</span> <span class="toc-text">find命令条件取反</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#查找指定inode号的文件，并改名"><span class="toc-number">6.</span> <span class="toc-text">查找指定inode号的文件，并改名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#根据文件权限查找文件-对组用户具有只读权限"><span class="toc-number">7.</span> <span class="toc-text">根据文件权限查找文件(对组用户具有只读权限)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#查找非隐藏空文件"><span class="toc-number">8.</span> <span class="toc-text">查找非隐藏空文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#找出5个最大的文件"><span class="toc-number">9.</span> <span class="toc-text">找出5个最大的文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#使用-type-查找指定类型的文件"><span class="toc-number">10.</span> <span class="toc-text">使用-type 查找指定类型的文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#查找在指定文件（修改，访问，状态变更）之后被访问的所有文件"><span class="toc-number">11.</span> <span class="toc-text">查找在指定文件（修改，访问，状态变更）之后被访问的所有文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#通过文件大小查找文件"><span class="toc-number">12.</span> <span class="toc-text">通过文件大小查找文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#根据时间查找文件"><span class="toc-number">13.</span> <span class="toc-text">根据时间查找文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#仅在当前文件系统中搜索"><span class="toc-number">14.</span> <span class="toc-text">仅在当前文件系统中搜索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#在find命令中使用多个"><span class="toc-number">15.</span> <span class="toc-text">在find命令中使用多个{}</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#将文件名中的空格换为下划线"><span class="toc-number">16.</span> <span class="toc-text">将文件名中的空格换为下划线</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#find多个条件关系为或"><span class="toc-number">17.</span> <span class="toc-text">find多个条件关系为或</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#使用正则表达式查找"><span class="toc-number">18.</span> <span class="toc-text">使用正则表达式查找</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#否定参数-查找非txt文件"><span class="toc-number">19.</span> <span class="toc-text">否定参数(查找非txt文件)</span></a></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2017 Guangliang Zhao&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;lucienchao@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+    
+<script>
+  var disqus_shortname = 'glzhao';
+  
+  var disqus_url = 'http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

@@ -72,6 +72,510 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-cli-2017-01-23-find命令示例" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2017-01-23/cli-2017-01-23-find命令示例/" class="article-date">
+  <time datetime="2017-01-23T03:02:15.000Z" itemprop="datePublished">2017-01-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cli/">cli</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/archive/2017-01-23/cli-2017-01-23-find命令示例/">find命令示例</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h4 id="用文件名查找文件"><a href="#用文件名查找文件" class="headerlink" title="用文件名查找文件"></a>用文件名查找文件</h4><pre><code>$ find . -name ${file_name}
+</code></pre><h4 id="用文件名查找文件，忽略名称的大小写"><a href="#用文件名查找文件，忽略名称的大小写" class="headerlink" title="用文件名查找文件，忽略名称的大小写"></a>用文件名查找文件，忽略名称的大小写</h4><pre><code>$ find . -iname ${file_name}
+</code></pre><h4 id="限定搜索目录的深度"><a href="#限定搜索目录的深度" class="headerlink" title="限定搜索目录的深度"></a>限定搜索目录的深度</h4><pre><code>$ find . -mindepth 2  -maxdepth 5 -name ${file_name}
+</code></pre><h4 id="在find命令查找到的文件上执行命令"><a href="#在find命令查找到的文件上执行命令" class="headerlink" title="在find命令查找到的文件上执行命令"></a>在find命令查找到的文件上执行命令</h4><pre><code>$ find . -name ${file_name} -exec md5sum {} \;
+</code></pre><h4 id="find命令条件取反"><a href="#find命令条件取反" class="headerlink" title="find命令条件取反"></a>find命令条件取反</h4><pre><code>$ find . -maxdepth 2 -not -name ${file_name}
+</code></pre><h4 id="查找指定inode号的文件，并改名"><a href="#查找指定inode号的文件，并改名" class="headerlink" title="查找指定inode号的文件，并改名"></a>查找指定inode号的文件，并改名</h4><pre><code>$ find . -inum ${inode_num} -exec mv {} ${new_name} \;
+</code></pre><h4 id="根据文件权限查找文件-对组用户具有只读权限"><a href="#根据文件权限查找文件-对组用户具有只读权限" class="headerlink" title="根据文件权限查找文件(对组用户具有只读权限)"></a>根据文件权限查找文件(对组用户具有只读权限)</h4><pre><code>$ find . -perm -g=r -type f -exec ls -l {} \;
+$ find . -perm 040 -type f -exec ls -l {} \;
+</code></pre><h4 id="查找非隐藏空文件"><a href="#查找非隐藏空文件" class="headerlink" title="查找非隐藏空文件"></a>查找非隐藏空文件</h4><pre><code>$ find . -maxdepth 1 -empty -not -name &quot;.*&quot; 
+</code></pre><h4 id="找出5个最大的文件"><a href="#找出5个最大的文件" class="headerlink" title="找出5个最大的文件"></a>找出5个最大的文件</h4><pre><code>$ find . -type f -exec ls -s {} \; |sort -n -r |head -5
+</code></pre><h4 id="使用-type-查找指定类型的文件"><a href="#使用-type-查找指定类型的文件" class="headerlink" title="使用-type 查找指定类型的文件"></a>使用-type 查找指定类型的文件</h4><pre><code>$ find . -type f/d/s(socket文件)
+</code></pre><h4 id="查找在指定文件（修改，访问，状态变更）之后被访问的所有文件"><a href="#查找在指定文件（修改，访问，状态变更）之后被访问的所有文件" class="headerlink" title="查找在指定文件（修改，访问，状态变更）之后被访问的所有文件"></a>查找在指定文件（修改，访问，状态变更）之后被访问的所有文件</h4><pre><code>$ find . -newer ${file_name}
+$ find . -anewer ${file_name}
+</code></pre><h4 id="通过文件大小查找文件"><a href="#通过文件大小查找文件" class="headerlink" title="通过文件大小查找文件"></a>通过文件大小查找文件</h4><pre><code>$ find . -size 100M/-100M/+100M
+</code></pre><h4 id="根据时间查找文件"><a href="#根据时间查找文件" class="headerlink" title="根据时间查找文件"></a>根据时间查找文件</h4><ul>
+<li>在60分钟内被访问的文件及目录<br>  <code>$ find . -amin -60</code></li>
+<li>在1天内被访问的文件及目录<br>  <code>$ find . -atmie -1</code></li>
+<li>在60分钟内被修改（数据）的文件及目录<br>  <code>$ find . -mmin -60</code> </li>
+<li>在1天内被修改（数据）的文件及目录<br>  <code>$ find . -mtime -1</code></li>
+<li>在60分钟内状态被更改(元数据或权限)的文件及目录<br>  <code>$ find . -cmin -60</code></li>
+<li>在1天内状态被更改（元数据或权限）的文件及目录<br>  <code>$ find . -ctime -1</code></li>
+</ul>
+<h4 id="仅在当前文件系统中搜索"><a href="#仅在当前文件系统中搜索" class="headerlink" title="仅在当前文件系统中搜索"></a>仅在当前文件系统中搜索</h4><pre><code>$ find / -xdev -name ${file_name}
+</code></pre><h4 id="在find命令中使用多个"><a href="#在find命令中使用多个" class="headerlink" title="在find命令中使用多个{}"></a>在find命令中使用多个{}</h4><pre><code>$ find . -name &quot;*.txt&quot; -exec mv {} {}.bak \;
+</code></pre><h4 id="将文件名中的空格换为下划线"><a href="#将文件名中的空格换为下划线" class="headerlink" title="将文件名中的空格换为下划线"></a>将文件名中的空格换为下划线</h4><pre><code>$ find . -type f -iname “*.mp3″ -exec rename “s/ /_/g” {} \;
+</code></pre><h4 id="find多个条件关系为或"><a href="#find多个条件关系为或" class="headerlink" title="find多个条件关系为或"></a>find多个条件关系为或</h4><pre><code>$ find . \(-name &quot;*.txt&quot; -o -name &quot;*.pdf&quot; \) -prinf
+</code></pre><h4 id="使用正则表达式查找"><a href="#使用正则表达式查找" class="headerlink" title="使用正则表达式查找"></a>使用正则表达式查找</h4><pre><code>$ find . -regex &quot;.*\(\.txt|\.pdf\)$&quot;
+$ find . -iregex &quot;.*\(\.txt|\.pdf\)$&quot;
+</code></pre><h4 id="否定参数-查找非txt文件"><a href="#否定参数-查找非txt文件" class="headerlink" title="否定参数(查找非txt文件)"></a>否定参数(查找非txt文件)</h4><pre><code>$ find . ! -name &quot;*.txt&quot; -print
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/" data-id="ciy9k9ofs000bq4jxsj89qm2i" class="article-share-link">分享</a>
+      
+      
+        <a href="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-find命令示例/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bash/">bash</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-cli-2017-01-23-sed简介" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2017-01-23/cli-2017-01-23-sed简介/" class="article-date">
+  <time datetime="2017-01-23T02:45:15.000Z" itemprop="datePublished">2017-01-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cli/">cli</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/archive/2017-01-23/cli-2017-01-23-sed简介/">sed简介</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>sed 是一个流编辑器，主要用来做文档过滤和格式转换,其命令行调用格式及选项如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sed [OPTION]... &#123;script-only-if-no-other-script&#125; [input-file]...</div></pre></td></tr></table></figure></p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-i</td>
+<td>原地修改输入文件</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>指定脚本文件</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>只有经过sed特殊处理的那一行(或者动作)才会被列出来。</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>直接在命令列模式上进行 sed 的动作编辑</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>sed 的动作支持的是扩张型正规表示法的语法。(默认是基础正规表示法语法)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sed-语法"><a href="#sed-语法" class="headerlink" title="sed 语法"></a>sed 语法</h2><p>sed每条操作指令由pattern和procedure两部分组成，pattern一般是用’/‘分隔的正则表达式或行号，而procedure则是一连串编辑命令</p>
+<h4 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h4><p>pattern限定sed指令作用的范围,其中可以包含0，1或2个地址,地址可以为正则表达式，行号，或者特殊行符号（如$)。pattern规则如下：</p>
+<ol>
+<li>如果没有指定地址，默认将编辑命令应用到所有行；</li>
+<li>如果指定一个地址，只将编辑命令应用到匹配该地址的行；</li>
+<li>如果指定一个地址对（addr1,addr2)，则将编辑命令应用到地址对中的所有行（包括起始和结束）；</li>
+<li>如果地址后面有一个感叹号（！），则将编辑命令应用到不匹配该地址的所有行；</li>
+</ol>
+<p>pattern格式例子：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'d'</span> list</div><div class="line">$ sed <span class="string">'1d'</span> list</div><div class="line">$ sed <span class="string">'$d'</span> list</div><div class="line">$ sed <span class="string">'/MA/d'</span> list</div><div class="line">$ sed <span class="string">'2,$d'</span> list</div><div class="line">$ sed <span class="string">'/Alice/,/Hubert/d'</span> list </div><div class="line">$ sed <span class="string">'2,/Hubert/d'</span> list</div></pre></td></tr></table></figure></p>
+<h4 id="指令"><a href="#指令" class="headerlink" title="指令"></a>指令</h4><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>命令</th>
+<th>语法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>替换</td>
+<td>s</td>
+<td>[address]s/pattern/replacement/flags</td>
+<td>替换匹配的内容</td>
+</tr>
+<tr>
+<td>删除</td>
+<td>d</td>
+<td>[address]d</td>
+<td>删除匹配的行</td>
+</tr>
+<tr>
+<td>插入</td>
+<td>i</td>
+<td>[line-address]i\text</td>
+<td>在匹配行的前方插入文本</td>
+</tr>
+<tr>
+<td>追加</td>
+<td>a</td>
+<td>[line-address]a\text</td>
+<td>在匹配行的后方插入文本</td>
+</tr>
+<tr>
+<td>行替换</td>
+<td>c</td>
+<td>[address]c\text</td>
+<td>将匹配的行替换成文本text</td>
+</tr>
+<tr>
+<td>打印行</td>
+<td>p</td>
+<td>[address]p</td>
+<td>打印在模式空间中的行</td>
+</tr>
+<tr>
+<td>打印行号</td>
+<td>=</td>
+<td>[address]=</td>
+<td>打印当前行行号</td>
+</tr>
+<tr>
+<td>打印行</td>
+<td>l</td>
+<td>[address]l</td>
+<td>打印在模式空间中的行，同时显示控制字符</td>
+</tr>
+<tr>
+<td>转换字符</td>
+<td>y</td>
+<td>[address]y/SET1/SET2/</td>
+<td>将SET1中出现的字符替换成SET2中对应位置的字符</td>
+</tr>
+<tr>
+<td>读取下一行</td>
+<td>n</td>
+<td>[address]n</td>
+<td>将下一行的内容读取到模式空间</td>
+</tr>
+<tr>
+<td>读文件</td>
+<td>r</td>
+<td>[line-address]r file</td>
+<td>将指定的文件读取到匹配行之后</td>
+</tr>
+<tr>
+<td>写文件</td>
+<td>w</td>
+<td>[address]w file</td>
+<td>将匹配地址的所有行输出到指定的文件中</td>
+</tr>
+<tr>
+<td>退出</td>
+<td>q</td>
+<td>[line-address]q</td>
+<td>读取到匹配的行之后即退出</td>
+</tr>
+</tbody>
+</table>
+<h4 id="处理流程"><a href="#处理流程" class="headerlink" title="处理流程"></a>处理流程</h4><ol>
+<li>读入新的一行内容到缓存空间；</li>
+<li>从指定的操作指令中取出第一条指令，判断是否匹配pattern；</li>
+<li>如果不匹配，则忽略后续的编辑命令，回到第2步继续取出下一条指令；</li>
+<li>如果匹配，则针对缓存的行执行后续的编辑命令；完成后，回到第2步继续取出下一条指令；</li>
+<li>当所有指令都应用之后，输出缓存行的内容回到第1步继续读入下一行内容；</li>
+<li>当所有行都处理完之后，结束；</li>
+</ol>
+<h4 id="替换"><a href="#替换" class="headerlink" title="替换"></a>替换</h4><p>语法格式如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[addrss]s/pattern/replacement/flags</div></pre></td></tr></table></figure></p>
+<p>flags的取值范围：</p>
+<ul>
+<li>空： 只替换第一次匹配</li>
+<li>n: 一个数字（取值范围1-512），表明仅替换前n个被pattern匹配的内容；</li>
+<li>g: 表示全局替换，替换所有被pattern匹配的内容；</li>
+<li>p: 仅当行被pattern匹配时，打印模式空间的内容；</li>
+<li>w file：仅当行被pattern匹配时，将模式空间的内容输出到文件file中</li>
+</ul>
+<p>元字符：</p>
+<ul>
+<li>&amp;: 被pattern匹配的内容；</li>
+<li>\num: 被pattern匹配的第num个分组（正则表达式中的概念，..括起来的部分称为分组；</li>
+<li>\: 转义符号，用来转义&amp;，\, 回车等符号</li>
+</ul>
+<h6 id="替换示例"><a href="#替换示例" class="headerlink" title="替换示例"></a>替换示例</h6><p>在substitute command后面增加(“s”)，同时在被修改的行前面增加+号<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'/substitute command/&#123;s//&amp;("s")/;s/^/+ /&#125;'</span> paragraph.txt</div></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># sed 's/version/story/gi' myfile.txt</span></div></pre></td></tr></table></figure>
+<h4 id="转换"><a href="#转换" class="headerlink" title="转换"></a>转换</h4><p>主要作用是将SET1中的字符替换成SET2中对应位置的字符，语法格式如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[address]y/SET1/SET2/</div></pre></td></tr></table></figure></p>
+<p>如：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'</span> <span class="built_in">test</span></div><div class="line">$ cat <span class="built_in">test</span> | tr a-z A-Z</div></pre></td></tr></table></figure></p>
+<h4 id="插入，追加，替换"><a href="#插入，追加，替换" class="headerlink" title="插入，追加，替换"></a>插入，追加，替换</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[line-address]a\ text</div><div class="line">[line-address]i\ text</div><div class="line">[address]c\ text</div></pre></td></tr></table></figure>
+<h4 id="取下一行命令"><a href="#取下一行命令" class="headerlink" title="取下一行命令"></a>取下一行命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ cat text</div><div class="line">.H1 <span class="string">"On Egypt"</span></div><div class="line">to be deleted </div><div class="line">Napoleon, pointing to the Pyramids, said to his troops:</div><div class="line"></div><div class="line">$ sed <span class="string">'/.H1/&#123;n;/^$/d&#125;'</span> text</div><div class="line">.H1 <span class="string">"On Egypt"</span></div><div class="line">Napoleon, pointing to the Pyramids, said to his troops:</div></pre></td></tr></table></figure>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><h4 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'2a append-content'</span> <span class="built_in">test</span></div><div class="line">$ sed <span class="string">'3i append-content'</span> <span class="built_in">test</span></div></pre></td></tr></table></figure>
+<h4 id="打印行号"><a href="#打印行号" class="headerlink" title="打印行号"></a>打印行号</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sed -n <span class="string">'1p'</span> list</div><div class="line">$ sed -n <span class="string">'l'</span> list</div><div class="line">$ sed -n <span class="string">'='</span> list</div></pre></td></tr></table></figure>
+<h4 id="第2行到最后一行的内容全部替换成’—-‘"><a href="#第2行到最后一行的内容全部替换成’—-‘" class="headerlink" title="第2行到最后一行的内容全部替换成’—-‘"></a>第2行到最后一行的内容全部替换成’—-‘</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'2,$c ---'</span> list</div></pre></td></tr></table></figure>
+<h4 id="查看除了给定范围外的整个文件"><a href="#查看除了给定范围外的整个文件" class="headerlink" title="查看除了给定范围外的整个文件"></a>查看除了给定范围外的整个文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'20,35d'</span> myfile.txt</div></pre></td></tr></table></figure>
+<h4 id="查看不连续的行或者范围"><a href="#查看不连续的行或者范围" class="headerlink" title="查看不连续的行或者范围"></a>查看不连续的行或者范围</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed -n <span class="_">-e</span> <span class="string">'5,7p'</span> <span class="_">-e</span> <span class="string">'10,13p'</span> myfile.txt</div></pre></td></tr></table></figure>
+<h4 id="使用正则匹配"><a href="#使用正则匹配" class="headerlink" title="使用正则匹配"></a>使用正则匹配</h4><h6 id="匹配多个空格"><a href="#匹配多个空格" class="headerlink" title="匹配多个空格"></a>匹配多个空格</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ ip a | sed <span class="string">'s/  */ /g'</span></div></pre></td></tr></table></figure>
+<h6 id="匹配多个字符"><a href="#匹配多个字符" class="headerlink" title="匹配多个字符"></a>匹配多个字符</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'s/[Zz]ip/rar/g'</span> myfile.txt</div></pre></td></tr></table></figure>
+<h6 id="匹配行起始"><a href="#匹配行起始" class="headerlink" title="匹配行起始"></a>匹配行起始</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed -n <span class="string">'/^Jul 1/ p'</span> /var/<span class="built_in">log</span>/secure</div></pre></td></tr></table></figure>
+<h6 id="去掉文件中开头带有-号的行或者空行"><a href="#去掉文件中开头带有-号的行或者空行" class="headerlink" title="去掉文件中开头带有#号的行或者空行"></a>去掉文件中开头带有#号的行或者空行</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'/^#\|^$\| *#/d'</span> httpd.conf</div></pre></td></tr></table></figure>
+<h6 id="每隔一行插入一个空行"><a href="#每隔一行插入一个空行" class="headerlink" title="每隔一行插入一个空行"></a>每隔一行插入一个空行</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed G myfile.txt</div></pre></td></tr></table></figure>
+<h6 id="每隔一行插入两个空行"><a href="#每隔一行插入两个空行" class="headerlink" title="每隔一行插入两个空行"></a>每隔一行插入两个空行</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'G;G'</span> myfile.txt</div></pre></td></tr></table></figure>
+<h4 id="用行内编辑来模仿dos2unix"><a href="#用行内编辑来模仿dos2unix" class="headerlink" title="用行内编辑来模仿dos2unix"></a>用行内编辑来模仿dos2unix</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed -i <span class="string">'s/\r//'</span> myfile.txt</div></pre></td></tr></table></figure>
+<h4 id="读写命令"><a href="#读写命令" class="headerlink" title="读写命令"></a>读写命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ sed <span class="string">'/^[Company-list]/r company.list;/^[Company-list]/d;'</span> text</div><div class="line">$ sed <span class="string">'/Northeast$/w region.northeast</span></div><div class="line">&gt; /South$/w region.south</div><div class="line">&gt; &gt; /Midwest$/w region.midwest</div><div class="line">&gt; &gt; /West$/w region.west' text</div></pre></td></tr></table></figure>
+<h4 id="组合命令"><a href="#组合命令" class="headerlink" title="组合命令"></a>组合命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed -n <span class="string">'1,4&#123;s/ MA/, Massachusetts/;s/ PA/, Pennsylvania/;p&#125;'</span> list</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-sed简介/" data-id="ciy9k9ofx000dq4jx7glbpd7e" class="article-share-link">分享</a>
+      
+      
+        <a href="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-sed简介/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sed/">sed</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-cli-2017-01-23-bash组合命令" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2017-01-23/cli-2017-01-23-bash组合命令/" class="article-date">
+  <time datetime="2017-01-23T02:38:05.000Z" itemprop="datePublished">2017-01-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cli/">cli</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/archive/2017-01-23/cli-2017-01-23-bash组合命令/">bash组合命令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h3 id="列出头十个最耗内存的进程"><a href="#列出头十个最耗内存的进程" class="headerlink" title="列出头十个最耗内存的进程"></a>列出头十个最耗内存的进程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ps aux | sort -nk +4 | tail</div></pre></td></tr></table></figure>
+<h3 id="linux-mount-samba目录"><a href="#linux-mount-samba目录" class="headerlink" title="linux mount samba目录"></a>linux mount samba目录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">//<span class="variable">$&#123;host addr&#125;</span>/gl/ /mnt cifs rw,uid=1000,gid=1000,user=***,pass=*** 0 0</div></pre></td></tr></table></figure>
+<h3 id="输出最常用的十条命令"><a href="#输出最常用的十条命令" class="headerlink" title="输出最常用的十条命令"></a>输出最常用的十条命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">history</span> | awk <span class="string">'&#123;CMD[$2]++;count++;&#125; END &#123; for (a in CMD )print CMD[a] " " CMD[a]/count*100 "% " a &#125;'</span> | grep -v <span class="string">"./"</span> | column -c3 <span class="_">-s</span> <span class="string">" "</span> -t | sort -nr | nl | head -n10</div></pre></td></tr></table></figure>
+<h3 id="远程关闭一台Windows的机器"><a href="#远程关闭一台Windows的机器" class="headerlink" title="远程关闭一台Windows的机器"></a>远程关闭一台Windows的机器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">net rpc shutdown -I ipAddressOfWindowsPC -U username%password</div></pre></td></tr></table></figure>
+<h3 id="检查gmail未读邮件"><a href="#检查gmail未读邮件" class="headerlink" title="检查gmail未读邮件"></a>检查gmail未读邮件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -u username –silent “https://mail.google.com/mail/feed/atom” | perl <span class="_">-ne</span> ‘<span class="built_in">print</span> “\t” <span class="keyword">if</span> /&lt;name&gt;/; <span class="built_in">print</span> “<span class="variable">$2</span>\n” <span class="keyword">if</span> /&lt;(title|name)&gt;(.*)&lt;\/\1&gt;/;’</div></pre></td></tr></table></figure>
+<h3 id="命令行的方式更新twitter"><a href="#命令行的方式更新twitter" class="headerlink" title="命令行的方式更新twitter"></a>命令行的方式更新twitter</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -u user:pass <span class="_">-d</span> status=”Tweeting from the shell” http://twitter.com/statuses/update.xml</div></pre></td></tr></table></figure>
+<h3 id="删除意外在当前文件夹下解压的文件"><a href="#删除意外在当前文件夹下解压的文件" class="headerlink" title="删除意外在当前文件夹下解压的文件"></a>删除意外在当前文件夹下解压的文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/bin/rm <span class="_">-f</span> <span class="string">"<span class="variable">$(tar ztf /path/to/file.tar.gz)</span>"</span></div></pre></td></tr></table></figure>
+<h3 id="使用netcat（nc）传输文件"><a href="#使用netcat（nc）传输文件" class="headerlink" title="使用netcat（nc）传输文件"></a>使用netcat（nc）传输文件</h3><ul>
+<li><p>用nc传送文件夹</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">dst: nc <span class="_">-l</span> -p 1234 | uncompress -c | tar xvfp -</div><div class="line">src：tar cfp - /some/dir | compress -c | nc -w 3 [destination] 1234</div></pre></td></tr></table></figure>
+</li>
+<li><p>传送单个文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">dst：nc <span class="_">-l</span> 1234 &gt; /etc/nginx/nginx.conf</div><div class="line">src：cat /etc/nginx/nginc.conf | nc 192.169.0.200 1234</div></pre></td></tr></table></figure>
+</li>
+<li><p>使用nc导入远程系统的磁盘</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">src: dd <span class="keyword">if</span>=/dev/sda bs=16065b | netcat ip-target 1234 </div><div class="line">dst: netcat <span class="_">-l</span> -p 1234 | dd of=/dev/mapper/laptop bs=16065b</div></pre></td></tr></table></figure>
+</li>
+<li><p>使用nc测试网络速度</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">src: dd <span class="keyword">if</span>=/dev/zero bs=256M count=1 | nc [remoteIP] [remotePort] </div><div class="line">dst: nc <span class="_">-l</span> port &gt; /dev/null</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="使用rsync-ssh传输文件"><a href="#使用rsync-ssh传输文件" class="headerlink" title="使用rsync+ssh传输文件"></a>使用rsync+ssh传输文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">rsync -avz <span class="_">-e</span> <span class="string">"ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"</span> --progress /root/bigfile.txt username@198.211.117.129:/</div></pre></td></tr></table></figure>
+<h3 id="删除大文件"><a href="#删除大文件" class="headerlink" title="删除大文件"></a>删除大文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt; logfile &amp;&amp; rm logfile</div></pre></td></tr></table></figure>
+<h3 id="记录终端命令"><a href="#记录终端命令" class="headerlink" title="记录终端命令"></a>记录终端命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">script my.terminal</div><div class="line">ls &amp;&amp; date &amp;&amp; <span class="built_in">exit</span></div><div class="line">less my.terminal</div></pre></td></tr></table></figure>
+<h3 id="生成给定字符串的MD5，并且只显示生成的校验和"><a href="#生成给定字符串的MD5，并且只显示生成的校验和" class="headerlink" title="生成给定字符串的MD5，并且只显示生成的校验和"></a>生成给定字符串的MD5，并且只显示生成的校验和</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">echo</span> -n <span class="string">"String to get MD5"</span> | md5sum | sed <span class="string">"s/ -//"</span></div></pre></td></tr></table></figure>
+<h3 id="输出写入日志，同时到标准输出"><a href="#输出写入日志，同时到标准输出" class="headerlink" title="输出写入日志，同时到标准输出"></a>输出写入日志，同时到标准输出</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mycoolapp arg1 arg2 input.file | tee my.log</div></pre></td></tr></table></figure>
+<h3 id="两个文件的交集，合集，不同"><a href="#两个文件的交集，合集，不同" class="headerlink" title="两个文件的交集，合集，不同"></a>两个文件的交集，合集，不同</h3><ul>
+<li>合集 <code>cat a b | sort | uniq &gt; c</code></li>
+<li>交集 <code>cat a b | sort | uniq -d &gt; c</code></li>
+<li>不同 <code>cat a b | sort | uniq -u &gt; c</code></li>
+</ul>
+<h3 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h3><ul>
+<li>远程文件处理 打开一个远程文件 <code>vim scp://username@host//path/to/somefile</code></li>
+<li>比较一个远程文件和一个本地文件 <code>ssh user@host cat /path/to/remotefile | diff /path/to/localfile -</code></li>
+<li>在远程机器上运行一段脚本,不用把脚本拷到远程机器上 <code>ssh user@server bash &lt; /path/to/local/script.sh</code></li>
+<li>将本地文件复制到远程服务器上 <code>ssh host sudo tee /etc/ceph/ceph.conf &lt;/etc/ceph/ceph.conf $ cat hosts | xargs -I{} ssh root@{} hostname</code></li>
+<li>比较本地和远程文件 <code>vimdiff /path/to/file scp://remotehost//path/to/file</code></li>
+</ul>
+<h3 id="给目标机器装免密码钥匙-ssh-copy-id"><a href="#给目标机器装免密码钥匙-ssh-copy-id" class="headerlink" title="给目标机器装免密码钥匙 (ssh-copy-id)"></a>给目标机器装免密码钥匙 (ssh-copy-id)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat .ssh/id_rsa.pub | ssh user@server <span class="string">"cat &gt;&gt;.ssh/authorized_keys"</span></div></pre></td></tr></table></figure>
+<h3 id="在多台远程机器上执行命令"><a href="#在多台远程机器上执行命令" class="headerlink" title="在多台远程机器上执行命令"></a>在多台远程机器上执行命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat hosts | xargs <span class="_">-l</span> &#123;&#125; ssh root@&#123;&#125; hostname</div></pre></td></tr></table></figure>
+<h3 id="不用编辑器修改文件"><a href="#不用编辑器修改文件" class="headerlink" title="不用编辑器修改文件"></a>不用编辑器修改文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ cat &gt; tmp</div><div class="line">$ abc</div><div class="line">$ ctrl + D</div></pre></td></tr></table></figure>
+<h3 id="追加（导入）一个文件到另一个"><a href="#追加（导入）一个文件到另一个" class="headerlink" title="追加（导入）一个文件到另一个"></a>追加（导入）一个文件到另一个</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat &gt;&gt; <span class="built_in">test</span> &lt; LICIENCE</div></pre></td></tr></table></figure>
+<h3 id="删除-变量中的-横线"><a href="#删除-变量中的-横线" class="headerlink" title="删除 变量中的 横线"></a>删除 变量中的 横线</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">UUID=<span class="string">"63b726a0-4c59-45e4-af65-bced5d268456"</span>; <span class="built_in">echo</span> <span class="variable">$&#123;UUID//-/&#125;</span></div></pre></td></tr></table></figure>
+<h3 id="lsof"><a href="#lsof" class="headerlink" title="lsof"></a>lsof</h3><ul>
+<li>返回命令和进程ID以及任何正在访问目录的任务 <code>lsof +D /mnt/windows</code></li>
+<li>查看打开端口的进程 <code>lsof -Pan -i tcp -i udp</code></li>
+</ul>
+<h3 id="检查变量是否为数字"><a href="#检查变量是否为数字" class="headerlink" title="检查变量是否为数字"></a>检查变量是否为数字</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> [[ <span class="string">"<span class="variable">$1</span>"</span> =~ ^[0-9]+$ ]]; <span class="keyword">then</span> <span class="built_in">echo</span> <span class="string">"Is a number"</span>; <span class="keyword">fi</span></div></pre></td></tr></table></figure>
+<h3 id="命令行画一个logo"><a href="#命令行画一个logo" class="headerlink" title="命令行画一个logo"></a>命令行画一个logo</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">c=blue;convert -size 50x50 xc:<span class="variable">$c</span> <span class="variable">$c</span>.png; <span class="keyword">for</span> i <span class="keyword">in</span> red green yellow; <span class="keyword">do</span> convert <span class="variable">$c</span>.png -background <span class="variable">$i</span> -rotate 20 <span class="variable">$i</span>.png; rm <span class="variable">$c</span><span class="string">".png"</span>; c=<span class="variable">$i</span>; <span class="keyword">done</span>; mv <span class="variable">$i</span><span class="string">".png"</span> logo.png; display logo.png</div></pre></td></tr></table></figure>
+<h3 id="改图片的大小尺寸"><a href="#改图片的大小尺寸" class="headerlink" title="改图片的大小尺寸"></a>改图片的大小尺寸</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">convert input.png -gravity NorthWest -background transparent -extent 720×200 output.png</div></pre></td></tr></table></figure>
+<h3 id="下载整个网站"><a href="#下载整个网站" class="headerlink" title="下载整个网站"></a>下载整个网站</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">wget --random-wait -r -p <span class="_">-e</span> robots=off -U mozilla http://www.example.com</div></pre></td></tr></table></figure>
+<h3 id="不使用X完成抓取一次屏幕截图"><a href="#不使用X完成抓取一次屏幕截图" class="headerlink" title="不使用X完成抓取一次屏幕截图"></a>不使用X完成抓取一次屏幕截图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chvt 7; sleep 2; import -display :0.0 -window root sshot1.png; chvt 1;</div></pre></td></tr></table></figure>
+<p>使用基于X的屏幕捕获程序时，某些应用程序可能会影响最终的图片，可以通过命令行使用ImageMagick来完成这一功能。chvt命令改变了虚拟终端，而sleep命令给重绘屏幕提供了一个时间。导入命令会在最后的chvt命令把你再次打回到虚拟终端之前，捕获所有的显示并且保存到一个文件中。请确保你把所有的命令都输入在同一行中。</p>
+<h3 id="后台运行一段不终止的程序"><a href="#后台运行一段不终止的程序" class="headerlink" title="后台运行一段不终止的程序"></a>后台运行一段不终止的程序</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">screen <span class="_">-d</span> -m -S some_name ping my_router</div></pre></td></tr></table></figure>
+<p>-d -m参数启动“分离”模式，-S指定了一个session的标识。可以通过-R命令来重新“挂载”一个标识的session。 </p>
+<h3 id="压缩归档"><a href="#压缩归档" class="headerlink" title="压缩归档"></a>压缩归档</h3><h6 id="Tar"><a href="#Tar" class="headerlink" title="Tar"></a>Tar</h6><ul>
+<li>创建归档：<code>tar cvf archive.tar file1 file2 file3</code></li>
+<li>查看归档：<code>tar tvf archive.tar</code></li>
+<li>提取指定文件：<code>tar xvf archive.tar --wildcards &#39;*.c&#39;</code></li>
+<li>更新归档：<code>tar uvf archive.tar newfile.c</code></li>
+<li>删除归档中的文件： <code>tar --delete -f archive.tar file1.c</code></li>
+</ul>
+<h6 id="Gzip-Gunzip"><a href="#Gzip-Gunzip" class="headerlink" title="Gzip/Gunzip"></a>Gzip/Gunzip</h6><ul>
+<li>压缩文件：<code>gzip file(s)</code></li>
+<li>压缩一组文件：<code>cat file1 file2 file3 | gzip &gt; archieve.gz</code></li>
+<li>检查压缩比：<code>gzip -l archieve.gz</code></li>
+<li>解压文件：<code>gunzip -c archieve.gz（-c保留原始文件）或者 gzip -d * archieve.gz</code></li>
+</ul>
+<h6 id="Bzip2-Bunzip2"><a href="#Bzip2-Bunzip2" class="headerlink" title="Bzip2/Bunzip2"></a>Bzip2/Bunzip2</h6><ul>
+<li>压缩文件：<code>bzip2 -k file1 file2 file3</code>(-k’ 选项可以使得在压缩或解压缩之后保留原有的文件)</li>
+<li>解压文件：<code>bunzip2 filename</code></li>
+</ul>
+<h6 id="7-zip"><a href="#7-zip" class="headerlink" title="7-zip"></a>7-zip</h6><ul>
+<li>压缩文件：<code>7zr a archive-name.7z file-name(s) / directory-name(s)</code></li>
+<li>查看归档内容：<code>7zr l archive-name.7z</code></li>
+<li>提取归档内容：<code>7zr e archive-name.7z</code></li>
+<li>更新归档内容：<code>7zr u archive-name.7z new-file</code></li>
+<li>删除归档中的文件：<code>7zr d archive-name.7z file-to-be-deleted</code></li>
+</ul>
+<h3 id="online"><a href="#online" class="headerlink" title="online"></a>online</h3><p>解释bash命令：www.explainshell.com<br>组合命令：<a href="http://www.commandlinefu.com/commands/browse" target="_blank" rel="external">http://www.commandlinefu.com/commands/browse</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-bash组合命令/" data-id="ciy9k9ofn0007q4jx9gih9v9l" class="article-share-link">分享</a>
+      
+      
+        <a href="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-bash组合命令/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bash/">bash</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-cli-2017-01-23-awk简介" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/archive/2017-01-23/cli-2017-01-23-awk简介/" class="article-date">
+  <time datetime="2017-01-23T02:27:15.000Z" itemprop="datePublished">2017-01-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cli/">cli</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/archive/2017-01-23/cli-2017-01-23-awk简介/">awk简介</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h1 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h1><h2 id="什么是Awk"><a href="#什么是Awk" class="headerlink" title="什么是Awk"></a><strong>什么是Awk</strong></h2><p>Awk是一种小巧的编程语言及命令行工具。（其名称得自于它的创始人Alfred Aho、Peter Weinberger 和 Brian Kernighan姓氏的首个字母）。它非常适合服务器上的日志处理，主要是因为Awk可以对文件进行操作，通常以可读文本构建行。</p>
+<h2 id="代码结构"><a href="#代码结构" class="headerlink" title="代码结构"></a><strong>代码结构</strong></h2><p>Awk脚本的代码结构很简单，就是一系列的模式（pattern）和行为（action）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># comment</span></div><div class="line">Pattern1 &#123; ACTIONS; &#125;</div><div class="line"><span class="comment"># comment</span></div><div class="line">Pattern2 &#123; ACTIONS; &#125;</div></pre></td></tr></table></figure>
+<p>扫描文档的每一行时都必须与每一个模式进行匹配比较，而且一次只匹配一个模式。</p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a><strong>数据类型</strong></h2><p>Awk仅有两个主要的数据类型：字符串和数字。即便如此，Awk的字符串和数字还可以相互转换。字符串能够被解释为数字并把它的值转换为数字值。如果字符串不包含数字，它就被转换为0.</p>
+<p>它们都可以在你代码里的ACTIONS部分使用 = 操作符给变量赋值。我们可以在任意时刻、任意地方声明和使用变量，也可以使用未初始化的变量，此时他们的默认值是空字符串：“”。</p>
+<p>最后，Awk有数组类型，并且它们是动态的一维关联数组。它们的语法是这样的：var[key] = value 。Awk可以模拟多维数组，但无论怎样，这是一个大的技巧（big hack）。</p>
+<p>Awk里的变量都是全局变量。无论你在给定的块里定义什么变量，它对其他的块都是可见的，甚至是对每一行都是可见的。这严重限制了你的Awk脚本大小，不然他们会造成不可维护的可怕结果。请编写尽可能小的脚本。</p>
+<h2 id="模式"><a href="#模式" class="headerlink" title="模式"></a><strong>模式</strong></h2><p>可以使用的模式分为三大类：正则表达式、布尔表达式和特殊模式。</p>
+<h3 id="正则表达式和布尔表达式"><a href="#正则表达式和布尔表达式" class="headerlink" title="正则表达式和布尔表达式"></a><strong>正则表达式和布尔表达式</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/admin/ &#123; ... &#125; <span class="comment"># any line that contains 'admin'</span></div><div class="line">/^admin/ &#123; ... &#125; <span class="comment"># lines that begin with 'admin'</span></div><div class="line">/admin$/ &#123; ... &#125; <span class="comment"># lines that end with 'admin'</span></div><div class="line">/^[0-9.]+ / &#123; ... &#125; <span class="comment"># lines beginning with series of numbers and periods</span></div><div class="line">/(POST|PUT|DELETE)/ <span class="comment"># lines that contain specific HTTP verbs</span></div></pre></td></tr></table></figure>
+<p>注意，模式不能捕获特定的组（groups）使它们在代码的ACTIONS部分执行。模式是专门匹配内容的。</p>
+<p>布尔表达式与PHP或者Javascript中的布尔表达式类似。特别的是，在awk中可以使用&amp;&amp;（“与”）、||（“或”）、!（“非”）操作符。你几乎可以在所有类C语言中找到它们的踪迹。它们可以对常规数据进行操作。</p>
+<p>与PHP和Javascript更相似的特性是比较操作符，==，它会进行模糊匹配（fuzzy matching）。因此“23”字符串等于23，”23″ == 23 表达式返回true。!= 操作符同样在awk里使用，并且别忘了其他常见的操作符：&gt;，&lt;，&gt;=，和&lt;=。</p>
+<p>你同样可以混合使用它们：布尔表达式可以和常规表达式一起使用。 /admin/ || debug == true 这种用法是合法的，并且在遇到包含“admin”单词的行或者debug变量等于true时该表达式就会匹配成功。</p>
+<p>注意，如果你有一个特定的字符串或者变量要与正则表达式进行匹配，~ 和!~ 就是你想要的操作符。 这样使用它们：string ~ /regex/ 和 string !~ /regex/。</p>
+<p>同样要注意的是，所有的模式都只是可选的。</p>
+<h3 id="特殊的模式"><a href="#特殊的模式" class="headerlink" title="特殊的模式"></a><strong>特殊的模式</strong></h3><p>在Awk里有一些特殊的模式，但不是很多。</p>
+<p>第一个是BEGIN，它仅在所有的行都输入到文件之前进行匹配。这是你可以初始化你的脚本变量和所有种类的状态的主要地方</p>
+<p>另外一个就是END。就像你可能已经猜到的，它会在所有的输入都被处理完后进行匹配。这使你可以在退出前进行清除工作和一些最后的输出。</p>
+<h2 id="行为"><a href="#行为" class="headerlink" title="行为"></a><strong>行为</strong></h2><h3 id="常用行为"><a href="#常用行为" class="headerlink" title="常用行为"></a><strong>常用行为</strong></h3><p>这里有一堆可用的行为（possible actions），但是最常用和最有用的行为（以我的经验来说）是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&#123; <span class="built_in">print</span> <span class="variable">$0</span>; &#125; <span class="comment"># prints $0. In this case, equivalent to 'print' alone</span></div><div class="line">&#123; <span class="built_in">exit</span>; &#125; <span class="comment"># ends the program</span></div><div class="line">&#123; next; &#125; <span class="comment"># skips to the next line of input</span></div><div class="line">&#123; a=<span class="variable">$1</span>; b=<span class="variable">$0</span> &#125; <span class="comment"># variable assignment</span></div><div class="line">&#123; c[<span class="variable">$1</span>] = <span class="variable">$2</span> &#125; <span class="comment"># variable assignment (array)</span></div><div class="line"></div><div class="line">&#123; </div><div class="line">        <span class="keyword">if</span> (BOOLEAN) &#123; ACTION &#125;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (BOOLEAN) &#123; ACTION &#125;</div><div class="line">        <span class="keyword">else</span> &#123; ACTION &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">&#123; <span class="keyword">for</span> (i=1; i&lt;x; i++) &#123; ACTION &#125; &#125;</div><div class="line">&#123; <span class="keyword">for</span> (item <span class="keyword">in</span> c) &#123; ACTION &#125; &#125;</div></pre></td></tr></table></figure>
+<h3 id="print和printf"><a href="#print和printf" class="headerlink" title="print和printf"></a><strong>print和printf</strong></h3><p>awk中同时提供了print和printf两种打印输出的函数。其中print函数的参数可以是变量、数值或者字符串。字符串必须用双引号引用，参数用逗号分隔。如果没有逗号，参数就串联在一起而无法区分。这里，逗号的作用与输出文件的分隔符的作用是一样的，只是后者是空格而已。</p>
+<p>printf函数，其用法和c语言中printf基本相似,可以格式化字符串,输出复杂时，printf更加好用，代码更易懂。</p>
+<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a><strong>函数</strong></h3><p>可以使用下面的语法来调用函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123; somecall($2) &#125;</div></pre></td></tr></table></figure>
+<p>用户定义的函数同样很简单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># function arguments are call-by-value</div><div class="line">function name(parameter-list) &#123;</div><div class="line">        ACTIONS; # same actions as usual</div><div class="line">&#125;</div><div class="line"></div><div class="line"># return is a valid keyword</div><div class="line">function add1(val) &#123;</div><div class="line">        return val+1;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="特殊变量"><a href="#特殊变量" class="headerlink" title="特殊变量"></a><strong>特殊变量</strong></h3><p>除了常规变量（全局的，可以在任意地方使用），这里还有一系列特殊的变量，它们的的作用有点像配置条目（configuration entries）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ARGC               命令行参数个数</div><div class="line">ARGV               命令行参数排列</div><div class="line">ENVIRON            支持队列中系统环境变量的使用</div><div class="line">FILENAME           awk浏览的文件名</div><div class="line">FNR                浏览文件的记录数</div><div class="line">FS                 设置输入域分隔符，等价于命令行 -F选项</div><div class="line">NF                 浏览记录的域的个数</div><div class="line">NR                 已读的记录数</div><div class="line">OFS                输出域分隔符</div><div class="line">ORS                输出记录分隔符</div><div class="line">RS                 控制记录分隔符</div></pre></td></tr></table></figure>
+<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a><strong>示例</strong></h1><h2 id="处理erlang-crash-dump"><a href="#处理erlang-crash-dump" class="headerlink" title="处理erlang crash dump"></a><strong>处理erlang crash dump</strong></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Parse Erlang Crash Dumps and correlate mailbox size to the currently running</span></div><div class="line"><span class="comment"># function.</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># Once in the procs section of the dump, all processes are displayed with</span></div><div class="line"><span class="comment"># =proc:&lt;0.M.N&gt; followed by a list of their attributes, which include the</span></div><div class="line"><span class="comment"># message queue length and the program counter (what code is currently</span></div><div class="line"><span class="comment"># executing).</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># Run as:</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># $ awk -v threshold=$THRESHOLD -f queue_fun.awk $CRASHDUMP</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># Where $THRESHOLD is the smallest mailbox you want inspects. Default value</span></div><div class="line"><span class="comment"># is 1000.</span></div><div class="line">BEGIN &#123;</div><div class="line"><span class="keyword">if</span> (threshold == <span class="string">""</span>) &#123;</div><div class="line">threshold = 1000 <span class="comment"># default mailbox size</span></div><div class="line">&#125;</div><div class="line"></div><div class="line">procs = 0 <span class="comment"># are we in the =procs entries?</span></div><div class="line"><span class="built_in">print</span> <span class="string">"MESSAGE QUEUE LENGTH: CURRENT FUNCTION"</span></div><div class="line"><span class="built_in">print</span> <span class="string">"======================================"</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment"># Only bother with the =proc: entries. Anything else is useless.</span></div><div class="line">procs == 0 &amp;&amp; /^=proc/ &#123; procs = 1 &#125; <span class="comment"># entering the =procs entries</span></div><div class="line">procs == 1 &amp;&amp; /^=/ &amp;&amp; !/^=proc/ &#123; <span class="built_in">exit</span> 0 &#125; <span class="comment"># we're done</span></div><div class="line"></div><div class="line"><span class="comment"># Message queue length: 1210</span></div><div class="line"><span class="comment"># 1 2 3 4</span></div><div class="line">/^Message queue length: / &amp;&amp; <span class="variable">$4</span> &gt;= threshold &#123; flag=1; ct=<span class="variable">$4</span> &#125;</div><div class="line">/^Message queue length: / &amp;&amp; <span class="variable">$4</span> &lt; threshold &#123; flag=0 &#125;</div><div class="line"></div><div class="line"><span class="comment"># Program counter: 0x00007f5fb8cb2238 (io:wait_io_mon_reply/2 + 56)</span></div><div class="line"><span class="comment"># 1 2 3 4 5 6</span></div><div class="line">flag == 1 &amp;&amp; /^Program counter: / &#123; <span class="built_in">print</span> ct <span class="string">":"</span>, substr(<span class="variable">$4</span>,2) &#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-awk简介/" data-id="ciy9k9ofm0006q4jxiqc26ucf" class="article-share-link">分享</a>
+      
+      
+        <a href="http://glzhao.github.io/archive/2017-01-23/cli-2017-01-23-awk简介/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/awk/">awk</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-others-2017-01-22-迁移blog到hexo" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/" class="article-date">
@@ -109,7 +613,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/" data-id="ciy8rqwmi000dp2jxhz9fqdw3" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/" data-id="ciy9k9ogb000pq4jxuqzmn17j" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/#disqus_thread" class="article-comment-link">留言</a>
@@ -204,7 +708,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/" data-id="ciy8rqwm80007p2jxc5uh6jxu" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/" data-id="ciy9k9og5000jq4jxsxs38wmk" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/#disqus_thread" class="article-comment-link">留言</a>
@@ -227,7 +731,7 @@
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/tools-kernel/">tools kernel</a>
+    <a class="article-category-link" href="/categories/kernel-tools/">kernel_tools</a>
   </div>
 
   </div>
@@ -255,7 +759,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/" data-id="ciy8rqwmu000np2jxywr5ww2f" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/" data-id="ciy9k9ogl000yq4jxdhzi85zf" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/#disqus_thread" class="article-comment-link">留言</a>
@@ -278,7 +782,7 @@
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/tools-kernel/">tools kernel</a>
+    <a class="article-category-link" href="/categories/kernel-tools/">kernel_tools</a>
   </div>
 
   </div>
@@ -308,7 +812,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/" data-id="ciy8rqwmq000jp2jxhw3suhvg" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/" data-id="ciy9k9ogf000uq4jxy1nxfrm7" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/#disqus_thread" class="article-comment-link">留言</a>
@@ -331,7 +835,7 @@
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/tools-kernel/">tools kernel</a>
+    <a class="article-category-link" href="/categories/kernel-tools/">kernel_tools</a>
   </div>
 
   </div>
@@ -362,7 +866,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/" data-id="ciy8rqwmn000hp2jxd21vgh4x" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/" data-id="ciy9k9oge000sq4jxaw83fkio" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/#disqus_thread" class="article-comment-link">留言</a>
@@ -413,7 +917,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-introducing-cephx/" data-id="ciy8rqwm10005p2jxd9uatulp" class="article-share-link">分享</a>
+      <a data-url="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-introducing-cephx/" data-id="ciy9k9ofh0005q4jx6dsy1ekx" class="article-share-link">分享</a>
       
       
         <a href="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-introducing-cephx/#disqus_thread" class="article-comment-link">留言</a>
@@ -429,209 +933,11 @@
 
 
   
-    <article id="post-ceph-2014-04-21-ceph-commands-2-setting-debug-log-level" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/" class="article-date">
-  <time datetime="2014-04-20T16:04:27.000Z" itemprop="datePublished">2014-04-21</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/ceph/">ceph</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/">ceph commands (2) - setting debug log level</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>一般情况下，当系统运行一切顺利时，我们无须开启log，这对系统资源是一种浪费。然而有时我们不管是debug还是了解系统运行情况都需要实时的查看修改参数。系统log的设置可以通过多种方式来设置，比如系统配置文件ceph.conf,linux下配置log 速率的logrotate，以及ceph提供的在线查看修改方式。</p>
-        
-          <p class="article-more-link">
-            <a href="/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/#more">继续阅读全文 »</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/" data-id="ciy8rqwlu0002p2jx5qlz91fp" class="article-share-link">分享</a>
-      
-      
-        <a href="http://glzhao.github.io/archive/2014-04-21/ceph-2014-04-21-ceph-commands-2-setting-debug-log-level/#disqus_thread" class="article-comment-link">留言</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ceph/">ceph</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
 
 
-
-  
-    <article id="post-ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/" class="article-date">
-  <time datetime="2014-04-20T15:50:01.000Z" itemprop="datePublished">2014-04-20</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/ceph/">ceph</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/">ceph commands (1) - view and modify options online</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>ceph作为一个庞大的分布式系统，为我们提供了很多的选项参数，对于我们优化配置集群很有利。查看和修改在线系统的参数不管是对优化集群，管理生产系统，还是开发debug都有很大的价值。ceph中查看和修改命令对用户都不是很友好，而且需要了解各项参数的含义，但也正是这样限制了初级用户。若想更好的管理集群，需要更加深入的了解系统。</p>
-        
-          <p class="article-more-link">
-            <a href="/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/#more">继续阅读全文 »</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/" data-id="ciy8rqwlp0001p2jx5q3oezue" class="article-share-link">分享</a>
-      
-      
-        <a href="http://glzhao.github.io/archive/2014-04-20/ceph-2014-04-20-ceph-commands-1-view-and-modify-options-online/#disqus_thread" class="article-comment-link">留言</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ceph/">ceph</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-kernel-2014-04-13-build-kernel" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/archive/2014-04-13/kernel-2014-04-13-build-kernel/" class="article-date">
-  <time datetime="2014-04-13T13:37:56.000Z" itemprop="datePublished">2014-04-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/kernel/">kernel</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/archive/2014-04-13/kernel-2014-04-13-build-kernel/">build kernel</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Kernel-Build-processes"><a href="#Kernel-Build-processes" class="headerlink" title="Kernel Build processes"></a>Kernel Build processes</h1><p>##1. Creating a configuration file</p>
-<p>###a. Use a newly created .config</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make config</div></pre></td></tr></table></figure>
-        
-          <p class="article-more-link">
-            <a href="/archive/2014-04-13/kernel-2014-04-13-build-kernel/#more">继续阅读全文 »</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-04-13/kernel-2014-04-13-build-kernel/" data-id="ciy8rqwm60006p2jxwidmezmi" class="article-share-link">分享</a>
-      
-      
-        <a href="http://glzhao.github.io/archive/2014-04-13/kernel-2014-04-13-build-kernel/#disqus_thread" class="article-comment-link">留言</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kernel/">kernel</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-others-2014-03-22-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/archive/2014-03-22/others-2014-03-22-hello-world/" class="article-date">
-  <time datetime="2014-03-22T13:50:33.000Z" itemprop="datePublished">2014-03-22</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/others/">others</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/archive/2014-03-22/others-2014-03-22-hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <!-- Table of Contents -->
-        
-        <p>Started with hello world, just for test.</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://glzhao.github.io/archive/2014-03-22/others-2014-03-22-hello-world/" data-id="ciy8rqwmd000bp2jxye70sbup" class="article-share-link">分享</a>
-      
-      
-        <a href="http://glzhao.github.io/archive/2014-03-22/others-2014-03-22-hello-world/#disqus_thread" class="article-comment-link">留言</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+  <nav id="page-nav">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页&raquo;</a>
+  </nav>
 </section>
            
     <aside id="sidebar">
@@ -662,7 +968,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title categories">分类</h3>
     <div class="widget" id="categories">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ceph/">ceph</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/kernel/">kernel</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/others/">others</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-kernel/">tools kernel</a><span class="category-list-count">3</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ceph/">ceph</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/cli/">cli</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/kernel/">kernel</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/kernel-tools/">kernel_tools</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/others/">others</a><span class="category-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -672,7 +978,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title tagcloud">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/ceph/" style="font-size: 20px;">ceph</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/systemtap/" style="font-size: 20px;">systemtap</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a>
+      <a href="/tags/awk/" style="font-size: 10px;">awk</a> <a href="/tags/bash/" style="font-size: 15px;">bash</a> <a href="/tags/ceph/" style="font-size: 20px;">ceph</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/sed/" style="font-size: 10px;">sed</a> <a href="/tags/systemtap/" style="font-size: 20px;">systemtap</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a>
     </div>
   </div>
 
@@ -684,23 +990,23 @@
       <ul>
         
           <li>
+            <a href="/archive/2017-01-23/cli-2017-01-23-find命令示例/">find命令示例</a>
+          </li>
+        
+          <li>
+            <a href="/archive/2017-01-23/cli-2017-01-23-sed简介/">sed简介</a>
+          </li>
+        
+          <li>
+            <a href="/archive/2017-01-23/cli-2017-01-23-bash组合命令/">bash组合命令</a>
+          </li>
+        
+          <li>
+            <a href="/archive/2017-01-23/cli-2017-01-23-awk简介/">awk简介</a>
+          </li>
+        
+          <li>
             <a href="/archive/2017-01-22/others-2017-01-22-迁移blog到hexo/">迁移blog到hexo</a>
-          </li>
-        
-          <li>
-            <a href="/archive/2014-08-05/kernel-2014-08-05-tcpban-lian-jie-zhi-mi/">tcp半连接之谜</a>
-          </li>
-        
-          <li>
-            <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-3-array/">systemtap (3) - array</a>
-          </li>
-        
-          <li>
-            <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-2-grammar/">systemtap (2) - grammar</a>
-          </li>
-        
-          <li>
-            <a href="/archive/2014-04-24/tools-2014-04-24-systemtap-1-introduction/">systemtap (1) - introduction</a>
           </li>
         
       </ul>
@@ -712,7 +1018,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title archive">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/08/">August 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03/">March 2014</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/08/">August 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03/">March 2014</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
